@@ -1,15 +1,16 @@
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <queue>
 #include <chrono>
+#include "quantizer.hpp"
 #include "hnswlib/hnswlib.h"
 #include <ctime>
 #include <cstdlib>
 
 #include <unordered_set>
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/core/core_c.h>
 
 using namespace std;
 using namespace hnswlib;
@@ -501,475 +502,52 @@ struct elem_{
 	float dist;
 };
 
-void kmeans_(
-    float** train,
-    float** result,
-    int n,
-    int d
-){
-        unsigned seed;
-	float dist, min_dist;
-	int min_id;
-	int index;
-	int round= 5;  //10
-	float** temp_quan = new float*[L];  //temp array for 
-	int* tol_quan = new int[L];  //the number of objects on each center 
-	for(int i = 0; i < L; i++)
-		temp_quan[i] = new float[d];
-	
-	bool* flag= new bool[n];  // whether to choose it as a center
-    for(int i = 0; i < n; i++)
-		flag[i] = false;
-
-    double rand_;
-	for(int i = 0; i < L; i++){  //generate L intial centers randomly
-		 rand_ = double(i) / L;
-		 index = int( (n-1) * rand_);
-		if(index < 0 || index >= n){
-			printf("random_generator error\n");
-			exit(0);
-		}
-				
-		if(flag[index] == false){
-			for(int j = 0; j < d; j++)
-			    result[i][j] = train[index][j];
-			flag[index] = true;
-		}
-		else{
-            i--;           //re-generate center
-	    }	
-	}
-    float temp_sum;
-	
-	for(int l = 0; l < round; l++){
-	    temp_sum = 0;
-		for(int i = 0; i < L; i++)
-			for(int j = 0; j < d; j++)
-		        temp_quan[i][j] = 0;
-			
-		for(int i = 0; i < L; i++)
-            tol_quan[i] = 0;			
-		
-		for(int i = 0; i < n; i++){
-			for(int ii = 0; ii < L; ii++){
-			    dist = 0;
-			    for(int j =0; j < d; j++)
-				    dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
-				
-				if(ii == 0){
-				    min_dist = dist;
-				    min_id = 0;
-                    continue;					
-				}
-				
-			    if (dist < min_dist){
-				    min_dist = dist;
-				    min_id = ii;
-			    }
-		    }
-			for(int j = 0; j < d; j++){
-			    temp_quan[min_id][j] += train[i][j];
-			}
-			temp_sum += min_dist;
-			tol_quan[min_id]++;
-		}
-
-		for(int i = 0; i < L; i++){
-			if(tol_quan[i] == 0) continue;
-			else{
-				for(int j = 0; j < d; j++)
-					result[i][j] = temp_quan[i][j] / tol_quan[i];
-			}
-		}
-		
-	}
-
+// The demo retains its original pointer interface; training is shared with the
+// in-memory library and owns its temporary matrices through OpenCV.
+static cv::Mat1f copy_rows(float** rows, int count, int dim) {
+    cv::Mat1f result(count, dim);
+    for (int row = 0; row < count; ++row)
+        std::copy_n(rows[row], dim, result[row]);
+    return result;
 }
 
-void kmeans0_(
-    float** train,
-    float** result,
-    int n,
-    int d,
-	int cen1
-){
-        unsigned seed;
-	float dist, min_dist;
-	int min_id;
-	int index;
-	int round= 5;  //10
-	float** temp_quan = new float*[cen1];  //temp array for 
-	int* tol_quan = new int[cen1];  //the number of objects on each center 
-	for(int i = 0; i < cen1; i++)
-		temp_quan[i] = new float[d];
-	
-	bool* flag= new bool[n];  // whether to choose it as a center
-    for(int i = 0; i < n; i++)
-		flag[i] = false;
-
-    double rand_;
-	for(int i = 0; i < cen1; i++){  //generate L intial centers randomly
-		 rand_ = double(i) / cen1;
-		 index = int( (n-1) * rand_);
-		if(index < 0 || index >= n){
-			printf("random_generator error\n");
-			exit(0);
-		}
-				
-		if(flag[index] == false){
-			for(int j = 0; j < d; j++)
-			    result[i][j] = train[index][j];
-			flag[index] = true;
-		}
-		else{
-            i--;           //re-generate center
-	    }	
-	}
-    float temp_sum;
-
-	for(int l = 0; l < round; l++){
-	    temp_sum = 0;
-		for(int i = 0; i < cen1; i++)
-			for(int j = 0; j < d; j++)
-		        temp_quan[i][j] = 0;
-			
-		for(int i = 0; i < cen1; i++)
-            tol_quan[i] = 0;			
-		
-		for(int i = 0; i < n; i++){
-			for(int ii = 0; ii < cen1; ii++){
-			    dist = 0;
-			    for(int j =0; j < d; j++)
-				    dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
-				
-				if(ii == 0){
-				    min_dist = dist;
-				    min_id = 0;
-                    continue;					
-				}
-				
-			    if (dist < min_dist){
-				    min_dist = dist;
-				    min_id = ii;
-			    }
-		    }
-			for(int j = 0; j < d; j++){
-			    temp_quan[min_id][j] += train[i][j];
-			}
-			temp_sum += min_dist;
-			tol_quan[min_id]++;
-		}
-		for(int i = 0; i < cen1; i++){
-			if(tol_quan[i] == 0) continue;
-			else{
-				for(int j = 0; j < d; j++)
-					result[i][j] = temp_quan[i][j] / tol_quan[i];
-			}
-		}
-		
-	}
+static void copy_centers(const cv::Mat1f& centers, float** output) {
+    for (int row = 0; row < centers.rows; ++row)
+        std::copy_n(centers[row], centers.cols, output[row]);
 }
 
-int compare_int(const void * a, const void * b)
-{
-  return ( *(int*)a - *(int*)b );
-}	
-
-int compfloats(						// compare two real values
-	float v1,							// 1st value (type float)
-	float v2)							// 2nd value (type float)
-{
-	const float FLOATZERO = 1e-6F;
-	if (v1 - v2 < -FLOATZERO) return -1;   //?floatzero位置
-	else if (v1 - v2 > FLOATZERO) return 1;
-	else return 0;
+void kmeans_(float** train, float** result, int count, int dim) {
+    cv::Mat1f centers;
+    hvs::detail::kmeans(copy_rows(train, count, dim), centers);
+    copy_centers(centers, result);
 }
 
+void kmeans0_(float** train, float** result, int count, int dim, int centroids) {
+    cv::Mat1f centers;
+    hvs::detail::kmeans(copy_rows(train, count, dim), centers, centroids);
+    copy_centers(centers, result);
+}
 
-void sub_kmeans_(
-    float** train, //L * L * d
-    float** result,  //L * d
-    unsigned char* merge,   //length 2L
-    int d,
-	float** train1,
-	float** train2,
-	float** train0) //size_n * d
-{
+void sub_kmeans_(float** candidates, float** result, unsigned char* merge, int dim,
+                 float**, float**, float** train) {
+    cv::Mat1f centers;
+    hvs::detail::merge_quantizers(copy_rows(candidates, L * L, dim), centers, merge,
+                                  copy_rows(train, size_n, dim));
+    copy_centers(centers, result);
+}
 
-    unsigned seed;
-    int n = L*L;
-    int index;
-	int round= 5;
-	int first_num = 5;  //10
-	double rand_;
-	
-	int* weight = new int[L*L];
+void sub_kmeans0_(int block, float*** quantizer, unsigned char* merge, float** train,
+                  int subdim, int dim, float** quantizer0) {
+    std::vector<cv::Mat1f> books(min_book * nnum);
+    for (int part = 0; part < nnum; ++part)
+        books[block * nnum + part] = copy_rows(quantizer[block * nnum + part], L, subdim);
+    hvs::detail::build_start_merges(books, block, merge, copy_rows(train, size_n, dim));
+    for (int center = 0; center < cen; ++center)
+        for (int part = 0; part < nnum; ++part)
+            std::copy_n(quantizer[block * nnum + part][merge[center * nnum + part]], subdim,
+                        quantizer0[center] + part * subdim);
+}
 
-	for(int i = 0; i < L*L; i++){
-        weight[i] = 0;
-	}
-	
-	int min_id1 = 0;
-	int min_id2 = 0;
-	float min_sum1, min_sum2;	
-	float sum1 = 0;
-	float sum2 = 0;	
-	int half_d = d / 2;
-	float** array1 = new float* [L];
-	float** array2 = new float* [L];
-	for(int i = 0; i < L; i++){
-		array1[i] = new float[half_d];
-		array2[i] = new float[half_d];
-	}	
-	for(int i = 0; i < L; i++){
-		for(int j = 0; j < half_d; j++){
-		    array1[i][j] = train[i*L+i][j];
-		    array2[i][j] = train[i*L+i][half_d + j];
-		}
-	}	
-	for(int i = 0; i < size_n; i++){
-	    for(int j = 0; j < L; j++){
-	          sum1 = 0;
-	              sum2 = 0;
-			for(int s = 0; s < half_d; s++){
-			    sum1 += (train1[i][s] - array1[j][s]) * (train1[i][s] - array1[j][s]);
-			    sum2 += (train2[i][s] - array2[j][s]) * (train2[i][s] - array2[j][s]);
-			}
-			if(j == 0) {min_id1 = 0; min_sum1 = sum1; min_id2 = 0; min_sum2 = sum2;}
-			else{
-				if(sum1 < min_sum1) {min_id1 = j; min_sum1 = sum1;}
-                if(sum2 < min_sum2) {min_id2 = j; min_sum2 = sum2;}
-			}
-		}
-		weight[min_id1 * L + min_id2]++;
-	}
-	
-	float** temp_quan = new float*[L];
-	int** count = new int*[L];
-	int* tol_quan = new int[L];
-	int* w_quan = new int[L];
-	
-	for(int i = 0; i < L; i++){
-		temp_quan[i] = new float[d];
-	    count[i] = new int[L*L];
-	}
-	
-	bool * flag= new bool[n];
-    for(int i = 0; i < n; i++)
-		flag[i] = false;
-	
-	k_elem sort_array_[L*L];
-	int min_id, id1, id2; float min_dist, dist;
-	int pointer[L];
-
-	float tmp_dist;
-	
-	int* ord= new int[size_n];
-	
-	kmeans0_(train0, result, size_n, d, L);
-	
-	for(int i = 0; i < size_n; i++){
-		for(int j = 0; j < L; j++){
-			dist = 0;
-			for(int ii = 0; ii < d; ii++)
-				dist += (train0[i][ii] - result[j][ii]) * (train0[i][ii] - result[j][ii]);
-
-            if(j == 0){
-				min_id = 0;
-				min_dist = dist;
-			}
-            else{
-				if(dist < min_dist){
-					min_id = j;
-					min_dist = dist;
-				}		
-			}			
-		}
-		ord[i] = min_id;
-	}
-	//-------------------moving points------------------------
-    for(int ii = 0; ii < L; ii++){
-		for(int i = 0; i < n; i++){
-			dist = 0;
-			for(int j = 0; j < d; j++){
-				dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
-			}
-			sort_array_[i].id = i;
-		    sort_array_[i].dist = dist;
-		}
-	    qsort(sort_array_, n, sizeof(k_elem), QsortComp);
-			
-		for(int i = 0; i < first_num; i++){
-		    id1 = sort_array_[i].id;
-			dist = 0;
-			for(int j = 0; j < size_n; j++){
-					
-			    if(ord[j] != ii) continue;
-						
-				for(int s = 0; s < d; s++)
-					dist += (train[id1][s] - train0[j][s]) * (train[id1][s] - train0[j][s]);
-			}
-			if(i == 0){
-				min_id = id1;
-				min_dist = dist;
-				continue;
-			}
-			else{
-				if(dist < min_dist){
-					min_id = id1;
-					min_dist = dist;
-				}
-			}
-				
-		}
-		tmp_dist += min_dist;
-		pointer[ii] = min_id;
-		for(int i = 0; i < d; i++)
-			result[ii][i] = train[min_id][i];		
-	}	
-
-	//---------------------------------------------------------	
-	qsort(pointer, L, sizeof(int), compare_int);
-	//----------------important sampling-------
-	
-	float* mean_ = new float[d];
-	float* prob = new float[n];
-    float* prob2 = new float[n];	
-	
-	for(int i = 0; i < d; i++) 
-		mean_[i] = 0;
-	
-	for(int i = 0; i < n; i++)
-		prob[i] = 0;
-	
-	int a =0;
-	for(int i = 0; i < n; i++){
-		if(weight[i] == 0) continue;
-		for(int j = 0; j < d; j++){
-			mean_[j] +=  train[i][j];
-		}
-		a++;
-	}
-	for(int i = 0; i < d; i++)
-		mean_[i] = mean_[i] / a;
-	
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < d; j++){
-		    prob[i] += weight[i] * ( mean_[j] - train[i][j]) * (mean_[j] - train[i][j]);
-        }		
-	}	
-	float sum_prob = 0;
-	
-	for(int i = 0; i < n; i++)
-	    sum_prob += prob[i];
-	
-	for(int i = 0; i < n; i++)
-		prob[i] = 1 / n / 2.0f +  prob[i] / sum_prob / 2.0f;
-	
-	prob2[0] = prob[0];
-	for(int i = 1; i < n; i++){
-		prob2[i] = prob2[i-1] + prob[i];
-	}
-	
-	for(int i = 1; i < L; i++){
-		for(int j = 0; j <= i-1; j++){
-			if(pointer[i] == pointer[j]){
-	            rand_ = rand() / double(RAND_MAX);
-			    for(int l = 0; l < n; l++){
-				    if(rand_ <= prob2[l]){
-					    pointer[i] = l;
-			            i--;
-						break;
-					}
-				}
-                break;				
-			}	
-	    }
-	}
-	qsort(pointer, L, sizeof(int), compare_int);
-	//------------------------------------------	
-	for(int i = 0; i < L; i++){
-		merge[2*i] = pointer[i] / L;
-		merge[2*i+1] = pointer[i] % L;
-	}
-}	
-	
-void sub_kmeans0_(
-    int ii, 
-    float*** quantizer,   
-    unsigned char* merge,
-	float** train0,
-	int min_dim,
-	int max_dim,
-	float** quantizer0)
-{
-    int index;
-	float sum = 0;
-	float min_sum;
-    int min_id;	
-	bool flag;
-	
-	float** result = new float* [cen];
-	for(int i = 0; i < cen; i++)
-		result[i] = new float[max_dim];
-	
-	float* result0 = new float[min_dim];
-	
-	unsigned char** obj = new unsigned char* [cen];
-	for(int i = 0; i < cen; i++)
-		obj[i] = new unsigned char[nnum];
-	
-	kmeans0_(train0, result, size_n, max_dim, cen);
-		
-    for(int i = 0; i < cen; i++){
-		for(int j = 0; j < nnum; j++){			
-			for(int l = 0; l < min_dim; l++){
-			    result0[l] = result[i][j* min_dim +l];	
-			}
-            index = ii * nnum + j;
-            for(int l = 0; l < L; l++){
-				sum = 0;
-				for(int jj = 0; jj < min_dim; jj++){
-					sum += (quantizer[index][l][jj] - result0[jj]) * (quantizer[index][l][jj] - result0[jj]);
-				}
-				if(l == 0) {min_id = 0; min_sum = sum;}
-				else{
-					if(sum < min_sum){
-						min_id = l;
-						min_sum = sum;
-					}
-				}
-			}
-		    obj[i][j] = min_id;
-						
-			for(int l = 0; l < min_dim; l++)
-                quantizer0[i][ j * min_dim + l]	= quantizer[index][min_id][l];		
-		}
-	}
-	
-	for(int i = 0; i < cen; i++){
-		for(int j = i+1; j < cen; j++ ){
-			flag = true;
-			for(int l = 0; l < nnum; l++){
-				if(obj[i][l] != obj[j][l]){
-					flag = false;
-					break;
-				}
-			}
-			if(flag == true){
-			//	printf("same obj\n");
-			}
-		}
-	}
-	
-	for(int i = 0; i < cen; i++){
-		for(int j = 0; j < nnum; j++){
-			merge[i * nnum + j] = obj[i][j];
-		}
-	}
-		
-}		
-	
 void sift_test1B(
     char* path_data,
 	char* path_q,

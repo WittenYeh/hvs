@@ -1,0 +1,6 @@
+build/
+build-*/
+cmake-build-*/
+CMakeUserPresets.json
+*.bin
+*.gt

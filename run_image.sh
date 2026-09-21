@@ -17,6 +17,6 @@ dPath=./${dname}
 qPath=./${dname}
 
 
-./hnsw/build/main ${dPath}.ds nullptr ${n} ${d} ${T} -1 ${delta} -1
+./build/main ${dPath}.ds nullptr ${n} ${d} ${T} -1 ${delta} -1
 
-./hnsw/build/main ${dPath}.ds ${qPath}.q ${n} ${d} ${T} ${qn} ${K} ${L}
+./build/main ${dPath}.ds ${qPath}.q ${n} ${d} ${T} ${qn} ${K} ${L}

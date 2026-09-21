@@ -43,6 +43,7 @@ namespace hnswlib {
 
         HierarchicalNSW(int level_, SpaceInterface<dist_t> *s, size_t max_elements, int vecdim_, size_t M = 16, size_t ef_construction = 500, size_t random_seed = 100) :
                 link_list_locks_(max_elements), element_levels_(max_elements) {
+            try {
             max_elements_ = max_elements;
 
 			vecdim = vecdim_;
@@ -82,7 +83,7 @@ namespace hnswlib {
 			quan_size_ = new size_t[max_level_];
             size_quan_per_element_ = new size_t[max_level_];
 			quan_offset_ = new size_t[max_level_];
-			quan_level0_memory_ = new char* [max_level_];
+			quan_level0_memory_ = new char* [max_level_]{};
 			
 			for (int i = 0; i < max_level_; i++)
 			    length[i] = pow(2, max_level_ -i + OFF);
@@ -111,6 +112,10 @@ namespace hnswlib {
 			count_tmp = new int[max_level_];
 			for(int i = 0; i < max_level_; i++) {count_tmp[i] = 0;}
 			count0 = 0;
+            } catch (...) {
+                releaseMemory();
+                throw;
+            }
         }
 
     struct Neighbor {
@@ -164,23 +169,34 @@ namespace hnswlib {
             }
         };
 
-        ~HierarchicalNSW() {    
+        ~HierarchicalNSW() { releaseMemory(); }
+
+        void releaseMemory() noexcept {
 
             free(data_level0_memory_);
-            for (tableint i = 0; i < cur_element_count; i++) {
+            for (size_t i = 0; i < element_levels_.size(); i++) {
                 if (element_levels_[i] > 0)
                     free(linkLists_[i]);
             }
             free(linkLists_);
             delete visited_list_pool_;
+            if (quan_level0_memory_)
+                for (int level = 0; level < max_level_; ++level)
+                    free(quan_level0_memory_[level]);
+            delete[] quan_level0_memory_;
+            delete[] count_tmp;
+            delete[] length;
+            delete[] quan_size_;
+            delete[] size_quan_per_element_;
+            delete[] quan_offset_;
         }
 
         size_t max_elements_;
-        size_t cur_element_count;
+        size_t cur_element_count = 0;
         size_t size_data_per_element_;
         size_t size_links_per_element_;
 
-		int max_level_;
+		int max_level_ = 0;
         size_t M_;
         size_t maxM_;
         size_t maxM0_;
@@ -192,17 +208,17 @@ namespace hnswlib {
         int maxlevel_;
 
 		//--------------------------------------------
-		int* length;
+		int* length = nullptr;
 		int vecdim;
-		size_t*	quan_size_;
-        size_t* size_quan_per_element_;
-		size_t*	quan_offset_ ;
-		char**	quan_level0_memory_;
-        int* count_tmp;	
+		size_t* quan_size_ = nullptr;
+        size_t* size_quan_per_element_ = nullptr;
+		size_t* quan_offset_ = nullptr;
+		char** quan_level0_memory_ = nullptr;
+        int* count_tmp = nullptr;
         int count0;		
 		//-------------------------------------------
 
-        VisitedListPool *visited_list_pool_;
+        VisitedListPool *visited_list_pool_ = nullptr;
         std::mutex cur_element_count_guard_;
 
         std::vector<std::mutex> link_list_locks_;
@@ -214,8 +230,8 @@ namespace hnswlib {
         size_t offsetNorm_, offsetData_, offsetLevel0_;
 
 
-        char *data_level0_memory_;
-        char **linkLists_;
+        char *data_level0_memory_ = nullptr;
+        char **linkLists_ = nullptr;
         std::vector<int> element_levels_;
 
         size_t data_size_;
@@ -300,50 +316,37 @@ namespace hnswlib {
             return result;
         }
 		
-		void rotation_(int vecsize, int dim_, float** data, float* data2, float* R){
-			
-                    #pragma omp parallel for		
-			for(int i = 0; i < vecsize; i++){
-                            float* data3 = new float[dim_]; 
-		        for(int j = 0; j < dim_; j++){
-			        data3[j] = 0;
-			        //for(int l = 0; l < dim_; l++){
-			            //data2[j] += R[j * dim_ + l] * data[i][l];	
-						data3[j] = fstdistfunc_( (const void*) (R + j * dim_), (const void*) (data[i]), dist_func_param2_);	
-			        //}
-		        }
-		
-		        for(int l = 0; l < dim_; l++){
-			        data[i][l] = data3[l];
-		        }
-				delete[] data3;
-	        }			
-		}
-			
+        void rotation_(int vecsize, int dim, float** data, float*, float* rotation) {
+            #pragma omp parallel
+            {
+                std::vector<float> rotated(dim);
+                #pragma omp for
+                for (int row = 0; row < vecsize; ++row) {
+                    for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
+                        rotated[dim_idx] = fstdistfunc_(rotation + size_t(dim_idx) * dim,
+                                                       data[row], dist_func_param2_);
+                    std::copy(rotated.begin(), rotated.end(), data[row]);
+                }
+            }
+        }
 
-        void restore_index(float *query_data, float* array0, float* book, 
-            float** start_book, unsigned char*** merge, unsigned char** merge0, int* length, int* sdim, int tol_dim, float* temp_arr){
-	        
-		//printf("restore1\n");	
-            float* temp_arr2 = new float[sdim[0]];
+        void computeDistanceTable(const float* query, const float* packed, float* book,
+                                  int subdim, int padded_dim, float* rotated) const {
+            for (int row = 0; row < subdim; ++row) {
+                rotated[row] = fstdistfunc_(packed, query, dist_func_param_);
+                packed += padded_dim;
+            }
+            for (int center = 0; center < L; ++center) {
+                _mm_prefetch(packed, _MM_HINT_T0);
+                book[center] = compare_(packed, rotated, subdim);
+                packed += subdim;
+            }
+        }
 
-            int base_dim = sdim[0];
-		
-	        float* ind2 = array0 ;
-			
-	        for(int j = 0; j < base_dim; j++){
-		        temp_arr2[j] = fstdistfunc_( (const void*) ind2, (const void*) query_data, dist_func_param_);
-                ind2 += tol_dim;			
-	        }   
- 
-	        for(int j = 0; j < L; j++){
-		        _mm_prefetch(ind2, _MM_HINT_T0);
-
-		        book[j] = compare_(ind2, temp_arr2, base_dim);
-
-	            ind2 += base_dim;		
-	        }
-           	
+        void restore_index(float* query, float* packed, float* book,
+                           float**, unsigned char***, unsigned char**, int*, int* subdims,
+                           int padded_dim, float* scratch) {
+            computeDistanceTable(query, packed, book, subdims[0], padded_dim, scratch);
         }
 
         std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst>		
@@ -842,7 +845,7 @@ namespace hnswlib {
 			quan_size_ = new size_t[max_level_];
             size_quan_per_element_ = new size_t[max_level_];
 			quan_offset_ = new size_t[max_level_];
-			quan_level0_memory_ = new char* [max_level_];
+			quan_level0_memory_ = new char* [max_level_]{};
 			
 			for (int i = 0; i < max_level_; i++)
 			    length[i] = pow(2, max_level_ -i + OFF);
@@ -974,37 +977,35 @@ namespace hnswlib {
 		}
 
 		
-		void deleteLinklist(int ii, std::string location){
-			for(int i = 0; i < max_elements_; i++){
-                if (element_levels_[i] > 0){
-                    free(linkLists_[i]);
-					element_levels_[i] = 0;
-				}					
-			}
-			
-                        if(ii == -1){
-                               std::ofstream output(location, std::ios::binary);
+        // Complete a layer without serializing or releasing the original-vector graph.
+        void finishLayer(int level) {
+            for (size_t id = 0; id < element_levels_.size(); ++id)
+                if (element_levels_[id] > 0) {
+                    free(linkLists_[id]);
+                    element_levels_[id] = 0;
+                }
+            const int next = level + 1;
+            if (next < max_level_) {
+                quan_size_[next] = length[next] * sizeof(unsigned char);
+                size_quan_per_element_[next] = size_quan_level0_ + quan_size_[next] + sizeof(labeltype);
+                quan_offset_[next] = size_quan_level0_ + quan_size_[next];
+                quan_level0_memory_[next] = static_cast<char*>(malloc(max_elements_ * size_quan_per_element_[next]));
+                if (!quan_level0_memory_[next]) throw std::bad_alloc();
+            }
+        }
 
-                                   writeBinaryPOD(output, max_elements_);
-                                 writeBinaryPOD(output, size_data_per_element_);
-                                output.write(data_level0_memory_, max_elements_ * size_data_per_element_);
-                                output.close();
+        void deleteLinklist(int level, std::string location) {
+            finishLayer(level);
+            if (level == -1) {
+                std::ofstream output(location, std::ios::binary);
+                writeBinaryPOD(output, max_elements_);
+                writeBinaryPOD(output, size_data_per_element_);
+                output.write(data_level0_memory_, max_elements_ * size_data_per_element_);
+                free(data_level0_memory_);
+                data_level0_memory_ = nullptr;
+            }
+        }
 
-				free(data_level0_memory_);
-			    data_level0_memory_ = NULL;
-			}
-			
-			int k = ii + 1;
-            if(k <= max_level_ - 1){
-			    quan_size_[k] = length[k] * sizeof(unsigned char);	
-				size_quan_per_element_[k] = size_quan_level0_ + quan_size_[k] + sizeof(labeltype);
-				quan_offset_[k] = size_quan_level0_ + quan_size_[k];
-				quan_level0_memory_[k] = (char *) malloc(max_elements_ * size_quan_per_element_[k]);
-                if (quan_level0_memory_[k] == nullptr)
-                throw std::runtime_error("Not enough memory");				
-          	}		
-		}
-		
 		//-----------------------------------------------------------------
         tableint addPoint(const void *data_point, labeltype label, int level, float*** book, int level2, bool flag) {	
 		tableint cur_c = 0;
@@ -1423,8 +1424,9 @@ namespace hnswlib {
         }
 
 
-void SearchWithsingleGraph(float** book_, int X, unsigned* points, 
-    unsigned* enter_point, unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_) {
+void SearchWithsingleGraph(float** book_, int X, const unsigned* points,
+    unsigned* enter_point, const unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_,
+    std::vector<Neighbor>* workspace = nullptr) {
   //unsigned L = parameters.Get<unsigned>("L_search");
   unsigned LL = ef;
    VisitedList *vl = visited_list_pool_->getFreeVisitedList();
@@ -1440,7 +1442,9 @@ void SearchWithsingleGraph(float** book_, int X, unsigned* points,
   else{
 	fan_new = fan;
   }
-  std::vector<Neighbor> retset(LL + 1);
+  std::vector<Neighbor> local_candidates;
+  auto& retset = workspace ? *workspace : local_candidates;
+  retset.assign(LL + 1, Neighbor{});
   
   size_t quan_len_ = quan_size_[0];
   size_t size_quan_per_element = size_quan_per_element_[0];
@@ -1506,8 +1510,9 @@ void SearchWithsingleGraph(float** book_, int X, unsigned* points,
 
 
 
-void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_point, 
-        unsigned int* trans, size_t ef, char* fflag, int level, VisitedListPool *visited_list_pool_) {
+void SearchWithquanGraph(float** book_, int X, const unsigned* points, elem* init_point,
+        const unsigned int* trans, size_t ef, const char* fflag, int level, VisitedListPool *visited_list_pool_,
+    std::vector<Neighbor>* workspace = nullptr) {
  // unsigned L = parameters.Get<unsigned>("L_search");
      unsigned LL = ef;
     VisitedList *vl = visited_list_pool_->getFreeVisitedList();
@@ -1523,7 +1528,9 @@ void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_poin
   else{
 	fan_new = fan;
   }
-  std::vector<Neighbor> retset(LL + 1);
+  std::vector<Neighbor> local_candidates;
+  auto& retset = workspace ? *workspace : local_candidates;
+  retset.assign(LL + 1, Neighbor{});
 
   size_t quan_len_ = quan_size_[level];
   size_t size_quan_per_element = size_quan_per_element_[level];
@@ -1597,8 +1604,9 @@ void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_poin
   visited_list_pool_->releaseVisitedList(vl); 
 }
 
-void SearchWithquanGraph2(float** book_, int X, elem* points, 
-    unsigned* init_point, unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_) {
+void SearchWithquanGraph2(float** book_, int X, const elem* points,
+    unsigned* init_point, const unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_,
+    std::vector<Neighbor>* workspace = nullptr) {
     unsigned LL = ef;
 
    VisitedList *vl = visited_list_pool_->getFreeVisitedList();
@@ -1606,7 +1614,9 @@ void SearchWithquanGraph2(float** book_, int X, elem* points,
    vl_type visited_array_tag = vl->curV; 
    
   float dist, sum;
-   std::vector<Neighbor> retset(LL + 1);
+   std::vector<Neighbor> local_candidates;
+  auto& retset = workspace ? *workspace : local_candidates;
+  retset.assign(LL + 1, Neighbor{});
  
 	size_t quan_len_ = quan_size_[0];
     size_t size_quan_per_element = size_quan_per_element_[0];
@@ -1679,8 +1689,9 @@ void SearchWithquanGraph2(float** book_, int X, elem* points,
   visited_list_pool_->releaseVisitedList(vl); 
 }
 
-void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point, 
-    unsigned int* trans, size_t ef, char* fflag, int level, VisitedListPool *visited_list_pool_) {
+void SearchWithquanGraph3(float** book_, int X, const elem* points, elem* init_point,
+    const unsigned int* trans, size_t ef, const char* fflag, int level, VisitedListPool *visited_list_pool_,
+    std::vector<Neighbor>* workspace = nullptr) {
   unsigned LL = ef;
   
      VisitedList *vl = visited_list_pool_->getFreeVisitedList();
@@ -1688,7 +1699,9 @@ void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point,
    vl_type visited_array_tag = vl->curV;  
 
   float dist, sum;
-   std::vector<Neighbor> retset(LL + 1);
+   std::vector<Neighbor> local_candidates;
+  auto& retset = workspace ? *workspace : local_candidates;
+  retset.assign(LL + 1, Neighbor{});
   
 	size_t quan_len_ = quan_size_[level];
     size_t size_quan_per_element = size_quan_per_element_[level];
@@ -1770,13 +1783,15 @@ void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point,
 }
 
 
-void SearchWithOptGraph(const float *query, size_t K, size_t ef, 
-        unsigned *indices, unsigned *init_point, VisitedListPool *visited_list_pool_) {
+void SearchWithOptGraph(const float *query, size_t K, size_t ef,
+        unsigned *indices, const unsigned *init_point, VisitedListPool *visited_list_pool_,
+    std::vector<Neighbor>* workspace = nullptr) {
 
   unsigned LL = ef;
 
-  std::vector<Neighbor> retset(LL + 1);
-  std::vector<unsigned> init_ids(LL);
+  std::vector<Neighbor> local_candidates;
+  auto& retset = workspace ? *workspace : local_candidates;
+  retset.assign(LL + 1, Neighbor{});
 
      VisitedList *vl = visited_list_pool_->getFreeVisitedList();
    vl_type *visited_array = vl->mass;
