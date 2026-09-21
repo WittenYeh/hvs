@@ -1,0 +1,15 @@
+threads,k,target_recall,upstream_qps,current_qps,speedup,method
+1,1,0.9,8342.4986343439,8896.048235970356,1.0663529747967397,log-QPS interpolation between measured recall points
+1,1,0.95,5908.731030796704,6079.339519958589,1.028873964354218,log-QPS interpolation between measured recall points
+1,1,0.99,1757.2325967916497,1849.7251850550194,1.052635370202125,log-QPS interpolation between measured recall points
+1,10,0.9,6095.1906700579,6291.916174151749,1.032275529141401,log-QPS interpolation between measured recall points
+1,10,0.95,4397.066440721401,4532.561483431128,1.0308148727194346,log-QPS interpolation between measured recall points
+1,10,0.99,2252.3833109450234,2264.8862878954415,1.0055509987530373,log-QPS interpolation between measured recall points
+1,100,0.99,955.3476977256946,982.3301736359349,1.028243618500861,log-QPS interpolation between measured recall points
+16,1,0.9,108974.37709184167,110791.80208640128,1.0166775442361824,log-QPS interpolation between measured recall points
+16,1,0.95,72183.59591588232,73789.3376673025,1.0222452446576837,log-QPS interpolation between measured recall points
+16,1,0.99,21466.845375132136,21866.053578126593,1.0185965006044584,log-QPS interpolation between measured recall points
+16,10,0.9,75682.85911542745,70035.4604914286,0.92538074420014,log-QPS interpolation between measured recall points
+16,10,0.95,53797.639843273406,53894.810866730564,1.001806232090111,log-QPS interpolation between measured recall points
+16,10,0.99,26178.93114991522,26436.32205511845,1.0098319867885082,log-QPS interpolation between measured recall points
+16,100,0.99,11337.325780103387,11198.718759191745,0.9877742755566844,log-QPS interpolation between measured recall points

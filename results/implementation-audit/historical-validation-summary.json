@@ -1,0 +1,87 @@
+{
+  "historical": true,
+  "new_tests": false,
+  "source": "/home/weitang/hvs-migration-20260921/final-validation/summary.json",
+  "runs": [
+    {
+      "case": "gaussian32-T1",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 65792,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "gaussian32-T2",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 65792,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "gaussian32-T3",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 65792,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "gaussian32-T4",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 65792,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "gaussian17-T2",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 65792,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "sift128-T1",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 257000,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "sift128-T2",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 257000,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    },
+    {
+      "case": "glove100-T1",
+      "comparison": "upstream",
+      "all_index_fields_equal": true,
+      "all_query_ids_equal": true,
+      "query_configurations": 14,
+      "compared_ids": 131584,
+      "different_ids": 0,
+      "max_recall_delta_pp": 0.0
+    }
+  ]
+}

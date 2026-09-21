@@ -1,0 +1,1538 @@
+[
+  {
+    "case": "gaussian32-T1",
+    "threads": 64,
+    "n": 10000,
+    "nq": 256,
+    "same_index_compared_ids": 65792,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false
+    },
+    "upstream_layer_counts": [
+      10000
+    ],
+    "current_layer_counts": [
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 24,
+        "upstream_recall": 0.2734375,
+        "current_recall": 0.265625,
+        "recall_delta_pp": -0.78125
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.99609375,
+        "current_recall": 0.99609375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 12,
+        "upstream_recall": 0.890625,
+        "current_recall": 0.89453125,
+        "recall_delta_pp": 0.390625
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 2,
+        "upstream_recall": 0.97265625,
+        "current_recall": 0.96484375,
+        "recall_delta_pp": -0.78125
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.98828125,
+        "current_recall": 0.98828125,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 29,
+        "upstream_recall": 0.72265625,
+        "current_recall": 0.71875,
+        "recall_delta_pp": -0.390625
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 4,
+        "upstream_recall": 0.9984375,
+        "current_recall": 0.9984375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 585,
+        "upstream_recall": 0.801171875,
+        "current_recall": 0.806640625,
+        "recall_delta_pp": 0.5468750000000022
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 263,
+        "upstream_recall": 0.93515625,
+        "current_recall": 0.934765625,
+        "recall_delta_pp": -0.03906249999999778
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 48,
+        "upstream_recall": 0.990625,
+        "current_recall": 0.990625,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 4580,
+        "upstream_recall": 0.9865625,
+        "current_recall": 0.9868359375,
+        "recall_delta_pp": 0.027343749999997335
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 631,
+        "upstream_recall": 0.9991015625,
+        "current_recall": 0.9991796875,
+        "recall_delta_pp": 0.007812499999992895
+      }
+    ]
+  },
+  {
+    "case": "gaussian32-T2",
+    "threads": 64,
+    "n": 10000,
+    "nq": 256,
+    "same_index_compared_ids": 65792,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "layer1.merges": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false,
+      "layer1.degree": false,
+      "layer1.neighbors": false,
+      "layer1.labels": false,
+      "layer1.values": false,
+      "layer1.flags": false,
+      "layer1.transitions": false,
+      "layer1.merges": true
+    },
+    "upstream_layer_counts": [
+      5000,
+      10000
+    ],
+    "current_layer_counts": [
+      5000,
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 62,
+        "upstream_recall": 0.265625,
+        "current_recall": 0.24609375,
+        "recall_delta_pp": -1.953125
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 15,
+        "upstream_recall": 0.91015625,
+        "current_recall": 0.92578125,
+        "recall_delta_pp": 1.5625
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 5,
+        "upstream_recall": 0.97265625,
+        "current_recall": 0.9765625,
+        "recall_delta_pp": 0.390625
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.99609375,
+        "current_recall": 0.99609375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 34,
+        "upstream_recall": 0.76171875,
+        "current_recall": 0.796875,
+        "recall_delta_pp": 3.515625
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 6,
+        "upstream_recall": 0.999609375,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.03906249999999778
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 938,
+        "upstream_recall": 0.85078125,
+        "current_recall": 0.851953125,
+        "recall_delta_pp": 0.11718749999999334
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 383,
+        "upstream_recall": 0.953515625,
+        "current_recall": 0.957421875,
+        "recall_delta_pp": 0.390625
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 57,
+        "upstream_recall": 0.99453125,
+        "current_recall": 0.99375,
+        "recall_delta_pp": -0.07812499999999556
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 4627,
+        "upstream_recall": 0.99125,
+        "current_recall": 0.99171875,
+        "recall_delta_pp": 0.046875000000001776
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 642,
+        "upstream_recall": 0.99953125,
+        "current_recall": 0.999296875,
+        "recall_delta_pp": -0.023437500000000888
+      }
+    ]
+  },
+  {
+    "case": "gaussian32-T3",
+    "threads": 64,
+    "n": 10000,
+    "nq": 256,
+    "same_index_compared_ids": 65792,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "layer1.merges": true,
+      "layer2.merges": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false,
+      "layer1.degree": false,
+      "layer1.neighbors": false,
+      "layer1.labels": false,
+      "layer1.values": false,
+      "layer1.flags": false,
+      "layer1.transitions": false,
+      "layer1.merges": true,
+      "layer2.degree": false,
+      "layer2.neighbors": false,
+      "layer2.labels": false,
+      "layer2.values": false,
+      "layer2.flags": false,
+      "layer2.transitions": false,
+      "layer2.merges": true
+    },
+    "upstream_layer_counts": [
+      2500,
+      5000,
+      10000
+    ],
+    "current_layer_counts": [
+      2500,
+      5000,
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 97,
+        "upstream_recall": 0.32421875,
+        "current_recall": 0.3046875,
+        "recall_delta_pp": -1.953125
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 12,
+        "upstream_recall": 0.953125,
+        "current_recall": 0.9453125,
+        "recall_delta_pp": -0.78125
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 2,
+        "upstream_recall": 0.98828125,
+        "current_recall": 0.99609375,
+        "recall_delta_pp": 0.78125
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 32,
+        "upstream_recall": 0.83203125,
+        "current_recall": 0.8046875,
+        "recall_delta_pp": -2.734375
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 762,
+        "upstream_recall": 0.8890625,
+        "current_recall": 0.8875,
+        "recall_delta_pp": -0.15625000000000222
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 243,
+        "upstream_recall": 0.972265625,
+        "current_recall": 0.976171875,
+        "recall_delta_pp": 0.390625
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 43,
+        "upstream_recall": 0.99765625,
+        "current_recall": 0.996484375,
+        "recall_delta_pp": -0.11718750000000444
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 3968,
+        "upstream_recall": 0.9916796875,
+        "current_recall": 0.9917578125,
+        "recall_delta_pp": 0.007812499999992895
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 346,
+        "upstream_recall": 0.999609375,
+        "current_recall": 0.9997265625,
+        "recall_delta_pp": 0.011718750000000444
+      }
+    ]
+  },
+  {
+    "case": "gaussian32-T4",
+    "threads": 64,
+    "n": 10000,
+    "nq": 256,
+    "same_index_compared_ids": 65792,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "layer1.merges": true,
+      "layer2.merges": true,
+      "layer3.merges": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false,
+      "layer1.degree": false,
+      "layer1.neighbors": false,
+      "layer1.labels": false,
+      "layer1.values": false,
+      "layer1.flags": false,
+      "layer1.transitions": false,
+      "layer1.merges": true,
+      "layer2.degree": false,
+      "layer2.neighbors": false,
+      "layer2.labels": false,
+      "layer2.values": false,
+      "layer2.flags": false,
+      "layer2.transitions": false,
+      "layer2.merges": true,
+      "layer3.degree": false,
+      "layer3.neighbors": false,
+      "layer3.labels": false,
+      "layer3.values": false,
+      "layer3.flags": false,
+      "layer3.transitions": false,
+      "layer3.merges": true
+    },
+    "upstream_layer_counts": [
+      1250,
+      2500,
+      5000,
+      10000
+    ],
+    "current_layer_counts": [
+      1250,
+      2500,
+      5000,
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 118,
+        "upstream_recall": 0.28515625,
+        "current_recall": 0.2578125,
+        "recall_delta_pp": -2.734375
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 16,
+        "upstream_recall": 0.94140625,
+        "current_recall": 0.95703125,
+        "recall_delta_pp": 1.5625
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 2,
+        "upstream_recall": 0.9921875,
+        "current_recall": 0.9921875,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 29,
+        "upstream_recall": 0.84375,
+        "current_recall": 0.8359375,
+        "recall_delta_pp": -0.78125
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 9,
+        "upstream_recall": 0.999609375,
+        "current_recall": 0.99921875,
+        "recall_delta_pp": -0.03906249999999778
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 842,
+        "upstream_recall": 0.833203125,
+        "current_recall": 0.852734375,
+        "recall_delta_pp": 1.953125
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 371,
+        "upstream_recall": 0.954296875,
+        "current_recall": 0.95390625,
+        "recall_delta_pp": -0.03906250000000888
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 35,
+        "upstream_recall": 0.996484375,
+        "current_recall": 0.9953125,
+        "recall_delta_pp": -0.11718749999999334
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 5430,
+        "upstream_recall": 0.9856640625,
+        "current_recall": 0.98484375,
+        "recall_delta_pp": -0.08203125000000311
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 536,
+        "upstream_recall": 0.9989453125,
+        "current_recall": 0.99890625,
+        "recall_delta_pp": -0.0039062499999964473
+      }
+    ]
+  },
+  {
+    "case": "gaussian17-T2",
+    "threads": 64,
+    "n": 10000,
+    "nq": 256,
+    "same_index_compared_ids": 65792,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "layer1.merges": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false,
+      "layer1.degree": false,
+      "layer1.neighbors": false,
+      "layer1.labels": false,
+      "layer1.values": false,
+      "layer1.flags": false,
+      "layer1.transitions": false,
+      "layer1.merges": true
+    },
+    "upstream_layer_counts": [
+      5000,
+      10000
+    ],
+    "current_layer_counts": [
+      5000,
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 67,
+        "upstream_recall": 0.3984375,
+        "current_recall": 0.4453125,
+        "recall_delta_pp": 4.6875
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 3,
+        "upstream_recall": 0.98828125,
+        "current_recall": 0.984375,
+        "recall_delta_pp": -0.390625
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1,
+        "upstream_recall": 1.0,
+        "current_recall": 0.99609375,
+        "recall_delta_pp": -0.390625
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 256,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 12,
+        "upstream_recall": 0.921875,
+        "current_recall": 0.953125,
+        "recall_delta_pp": 3.125
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.999609375,
+        "current_recall": 0.999609375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 349,
+        "upstream_recall": 0.9546875,
+        "current_recall": 0.961328125,
+        "recall_delta_pp": 0.6640624999999956
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 80,
+        "upstream_recall": 0.991796875,
+        "current_recall": 0.993359375,
+        "recall_delta_pp": 0.15625000000000222
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 2560,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.999609375,
+        "current_recall": 0.999609375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 468,
+        "upstream_recall": 0.9993359375,
+        "current_recall": 0.999140625,
+        "recall_delta_pp": -0.01953125000000444
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 25600,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 22,
+        "upstream_recall": 1.0,
+        "current_recall": 0.9999609375,
+        "recall_delta_pp": -0.0039062499999964473
+      }
+    ]
+  },
+  {
+    "case": "sift128-T1",
+    "threads": 64,
+    "n": 10000,
+    "nq": 1000,
+    "same_index_compared_ids": 257000,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false
+    },
+    "upstream_layer_counts": [
+      9984
+    ],
+    "current_layer_counts": [
+      9984
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 157,
+        "upstream_recall": 0.542,
+        "current_recall": 0.539,
+        "recall_delta_pp": -0.30000000000000027
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 7,
+        "upstream_recall": 0.992,
+        "current_recall": 0.997,
+        "recall_delta_pp": 0.5000000000000004
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 27,
+        "upstream_recall": 0.966,
+        "current_recall": 0.971,
+        "recall_delta_pp": 0.5000000000000004
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 442,
+        "upstream_recall": 0.9739,
+        "current_recall": 0.9753,
+        "recall_delta_pp": 0.13999999999999568
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 63,
+        "upstream_recall": 0.9969,
+        "current_recall": 0.9972,
+        "recall_delta_pp": 0.029999999999996696
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 2,
+        "upstream_recall": 0.9998,
+        "current_recall": 0.9999,
+        "recall_delta_pp": 0.009999999999998899
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 100000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1365,
+        "upstream_recall": 0.99885,
+        "current_recall": 0.9989,
+        "recall_delta_pp": 0.004999999999999449
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 100000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 155,
+        "upstream_recall": 0.99996,
+        "current_recall": 0.99997,
+        "recall_delta_pp": 0.0010000000000065512
+      }
+    ]
+  },
+  {
+    "case": "sift128-T2",
+    "threads": 64,
+    "n": 10000,
+    "nq": 1000,
+    "same_index_compared_ids": 257000,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "layer1.merges": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false,
+      "layer1.degree": false,
+      "layer1.neighbors": false,
+      "layer1.labels": false,
+      "layer1.values": false,
+      "layer1.flags": false,
+      "layer1.transitions": false,
+      "layer1.merges": true
+    },
+    "upstream_layer_counts": [
+      5000,
+      9997
+    ],
+    "current_layer_counts": [
+      5000,
+      9997
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 214,
+        "upstream_recall": 0.605,
+        "current_recall": 0.595,
+        "recall_delta_pp": -1.0000000000000009
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1,
+        "upstream_recall": 1.0,
+        "current_recall": 0.999,
+        "recall_delta_pp": -0.10000000000000009
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 4,
+        "upstream_recall": 0.994,
+        "current_recall": 0.994,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1,
+        "upstream_recall": 0.999,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.10000000000000009
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 1000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 20,
+        "upstream_recall": 0.969,
+        "current_recall": 0.978,
+        "recall_delta_pp": 0.9000000000000008
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 4,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 466,
+        "upstream_recall": 0.9802,
+        "current_recall": 0.9794,
+        "recall_delta_pp": -0.07999999999999119
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 54,
+        "upstream_recall": 0.9972,
+        "current_recall": 0.9981,
+        "recall_delta_pp": 0.09000000000000119
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 10000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 7,
+        "upstream_recall": 0.9998,
+        "current_recall": 0.9998,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 100000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1605,
+        "upstream_recall": 0.99908,
+        "current_recall": 0.99912,
+        "recall_delta_pp": 0.004000000000004
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 100000,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 235,
+        "upstream_recall": 0.99999,
+        "current_recall": 0.99995,
+        "recall_delta_pp": -0.004000000000004
+      }
+    ]
+  },
+  {
+    "case": "glove100-T1",
+    "threads": 64,
+    "n": 10000,
+    "nq": 512,
+    "same_index_compared_ids": 131584,
+    "same_index_different_ids": 0,
+    "query_configurations": 14,
+    "scratch_reuse_checks": "17 query configurations per process, including a repeated ef=256 sweep; internal assertions passed",
+    "training_fields_equal": {
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true
+    },
+    "independent_build_index_fields_equal": {
+      "header": true,
+      "mult": true,
+      "counts": true,
+      "rotation": true,
+      "start_merges": true,
+      "codebooks": true,
+      "routes": false,
+      "base.degree": false,
+      "base.neighbors": false,
+      "base.labels": false,
+      "base.values": false,
+      "layer0.degree": false,
+      "layer0.neighbors": false,
+      "layer0.labels": false,
+      "layer0.values": false,
+      "layer0.flags": true,
+      "layer0.transitions": false
+    },
+    "upstream_layer_counts": [
+      10000
+    ],
+    "current_layer_counts": [
+      10000
+    ],
+    "queries": [
+      {
+        "k": 1,
+        "ef": 1,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 136,
+        "upstream_recall": 0.353515625,
+        "current_recall": 0.36328125,
+        "recall_delta_pp": 0.9765625
+      },
+      {
+        "k": 1,
+        "ef": 128,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 16,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 7,
+        "upstream_recall": 0.974609375,
+        "current_recall": 0.974609375,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 256,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 1.0,
+        "current_recall": 1.0,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 1,
+        "ef": 32,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 3,
+        "upstream_recall": 0.990234375,
+        "current_recall": 0.984375,
+        "recall_delta_pp": -0.5859375
+      },
+      {
+        "k": 1,
+        "ef": 64,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1,
+        "upstream_recall": 0.99609375,
+        "current_recall": 0.998046875,
+        "recall_delta_pp": 0.1953125
+      },
+      {
+        "k": 1,
+        "ef": 8,
+        "compared_ids": 512,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 36,
+        "upstream_recall": 0.896484375,
+        "current_recall": 0.91015625,
+        "recall_delta_pp": 1.3671875
+      },
+      {
+        "k": 10,
+        "ef": 128,
+        "compared_ids": 5120,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 15,
+        "upstream_recall": 0.9990234375,
+        "current_recall": 0.99921875,
+        "recall_delta_pp": 0.01953125000000444
+      },
+      {
+        "k": 10,
+        "ef": 16,
+        "compared_ids": 5120,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 654,
+        "upstream_recall": 0.9087890625,
+        "current_recall": 0.916015625,
+        "recall_delta_pp": 0.7226562499999978
+      },
+      {
+        "k": 10,
+        "ef": 256,
+        "compared_ids": 5120,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 0,
+        "upstream_recall": 0.9998046875,
+        "current_recall": 0.9998046875,
+        "recall_delta_pp": 0.0
+      },
+      {
+        "k": 10,
+        "ef": 32,
+        "compared_ids": 5120,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 337,
+        "upstream_recall": 0.96953125,
+        "current_recall": 0.9716796875,
+        "recall_delta_pp": 0.21484375000000444
+      },
+      {
+        "k": 10,
+        "ef": 64,
+        "compared_ids": 5120,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 75,
+        "upstream_recall": 0.99453125,
+        "current_recall": 0.994921875,
+        "recall_delta_pp": 0.03906249999999778
+      },
+      {
+        "k": 100,
+        "ef": 128,
+        "compared_ids": 51200,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 8395,
+        "upstream_recall": 0.98244140625,
+        "current_recall": 0.98216796875,
+        "recall_delta_pp": -0.027343749999997335
+      },
+      {
+        "k": 100,
+        "ef": 256,
+        "compared_ids": 51200,
+        "same_index_different_ids": 0,
+        "independent_build_different_ids": 1565,
+        "upstream_recall": 0.99798828125,
+        "current_recall": 0.99806640625,
+        "recall_delta_pp": 0.007812499999992895
+      }
+    ]
+  }
+]

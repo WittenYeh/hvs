@@ -1,0 +1,31 @@
+AUDIT_THREADS 64
+vecsize = 10000
+vecdim = 32
+level = 1
+build HNSW index...10.00 % completed
+build HNSW index...20.00 % completed
+build HNSW index...30.00 % completed
+build HNSW index...40.00 % completed
+build HNSW index...50.00 % completed
+build HNSW index...60.00 % completed
+build HNSW index...70.00 % completed
+build HNSW index...80.00 % completed
+build HNSW index...90.00 % completed
+Build base layer time:0.110909  seconds
+PCA...
+rotate matrix(OPQ)
+permutate sub-codebooks
+merging step
+training time:3.01804  seconds
+Level 0, build HVS index...10.00 % completed
+Level 0, build HVS index...20.00 % completed
+Level 0, build HVS index...30.00 % completed
+Level 0, build HVS index...40.00 % completed
+Level 0, build HVS index...50.00 % completed
+Level 0, build HVS index...60.00 % completed
+Level 0, build HVS index...70.00 % completed
+Level 0, build HVS index...80.00 % completed
+Level 0, build HVS index...90.00 % completed
+Build HVS layer time:0.122555  seconds
+build top layer
+Build time:12.6644  seconds

@@ -1,0 +1,1714 @@
+diff --git a/hnsw/CMakeLists.txt b/hnsw/CMakeLists.txt
+deleted file mode 100644
+index 7b78b92..0000000
+--- a/hnsw/CMakeLists.txt
++++ /dev/null
+@@ -1,19 +0,0 @@
+-cmake_minimum_required (VERSION 2.6)
+-project (hnsw_lib)
+-
+-find_package(OpenCV REQUIRED)
+-
+-include_directories("${PROJECT_BINARY_DIR}" ${OpenCV_INCLUDE_DIRS})
+-
+-
+-
+-set(SOURCE_EXE main.cpp)            
+-
+-set(SOURCE_LIB sift_1b.cpp)
+-
+-add_library(sift_test STATIC ${SOURCE_LIB})
+-
+-
+-add_executable(main ${SOURCE_EXE})
+-SET( CMAKE_CXX_FLAGS  "-Ofast -lrt -DNDEBUG -std=c++11 -I /usr/local/boost_1_75_0 -DHAVE_CXX0X -openmp -march=native -fpic -w -fopenmp -ftree-vectorize -ftree-vectorizer-verbose=0" )
+-target_link_libraries(main sift_test ${OpenCV_LIBS})  
+diff --git a/hnsw/hnswlib/hnswalg.h b/hnsw/hnswlib/hnswalg.h
+index 4156124..83a8852 100644
+--- a/hnsw/hnswlib/hnswalg.h
++++ b/hnsw/hnswlib/hnswalg.h
+@@ -43,6 +43,7 @@ namespace hnswlib {
+ 
+         HierarchicalNSW(int level_, SpaceInterface<dist_t> *s, size_t max_elements, int vecdim_, size_t M = 16, size_t ef_construction = 500, size_t random_seed = 100) :
+                 link_list_locks_(max_elements), element_levels_(max_elements) {
++            try {
+             max_elements_ = max_elements;
+ 
+ 			vecdim = vecdim_;
+@@ -82,7 +83,7 @@ namespace hnswlib {
+ 			quan_size_ = new size_t[max_level_];
+             size_quan_per_element_ = new size_t[max_level_];
+ 			quan_offset_ = new size_t[max_level_];
+-			quan_level0_memory_ = new char* [max_level_];
++			quan_level0_memory_ = new char* [max_level_]{};
+ 			
+ 			for (int i = 0; i < max_level_; i++)
+ 			    length[i] = pow(2, max_level_ -i + OFF);
+@@ -111,6 +112,10 @@ namespace hnswlib {
+ 			count_tmp = new int[max_level_];
+ 			for(int i = 0; i < max_level_; i++) {count_tmp[i] = 0;}
+ 			count0 = 0;
++            } catch (...) {
++                releaseMemory();
++                throw;
++            }
+         }
+ 
+     struct Neighbor {
+@@ -164,23 +169,34 @@ namespace hnswlib {
+             }
+         };
+ 
+-        ~HierarchicalNSW() {    
++        ~HierarchicalNSW() { releaseMemory(); }
++
++        void releaseMemory() noexcept {
+ 
+             free(data_level0_memory_);
+-            for (tableint i = 0; i < cur_element_count; i++) {
++            for (size_t i = 0; i < element_levels_.size(); i++) {
+                 if (element_levels_[i] > 0)
+                     free(linkLists_[i]);
+             }
+             free(linkLists_);
+             delete visited_list_pool_;
++            if (quan_level0_memory_)
++                for (int level = 0; level < max_level_; ++level)
++                    free(quan_level0_memory_[level]);
++            delete[] quan_level0_memory_;
++            delete[] count_tmp;
++            delete[] length;
++            delete[] quan_size_;
++            delete[] size_quan_per_element_;
++            delete[] quan_offset_;
+         }
+ 
+         size_t max_elements_;
+-        size_t cur_element_count;
++        size_t cur_element_count = 0;
+         size_t size_data_per_element_;
+         size_t size_links_per_element_;
+ 
+-		int max_level_;
++		int max_level_ = 0;
+         size_t M_;
+         size_t maxM_;
+         size_t maxM0_;
+@@ -192,17 +208,17 @@ namespace hnswlib {
+         int maxlevel_;
+ 
+ 		//--------------------------------------------
+-		int* length;
++		int* length = nullptr;
+ 		int vecdim;
+-		size_t*	quan_size_;
+-        size_t* size_quan_per_element_;
+-		size_t*	quan_offset_ ;
+-		char**	quan_level0_memory_;
+-        int* count_tmp;	
++		size_t* quan_size_ = nullptr;
++        size_t* size_quan_per_element_ = nullptr;
++		size_t* quan_offset_ = nullptr;
++		char** quan_level0_memory_ = nullptr;
++        int* count_tmp = nullptr;
+         int count0;		
+ 		//-------------------------------------------
+ 
+-        VisitedListPool *visited_list_pool_;
++        VisitedListPool *visited_list_pool_ = nullptr;
+         std::mutex cur_element_count_guard_;
+ 
+         std::vector<std::mutex> link_list_locks_;
+@@ -214,8 +230,8 @@ namespace hnswlib {
+         size_t offsetNorm_, offsetData_, offsetLevel0_;
+ 
+ 
+-        char *data_level0_memory_;
+-        char **linkLists_;
++        char *data_level0_memory_ = nullptr;
++        char **linkLists_ = nullptr;
+         std::vector<int> element_levels_;
+ 
+         size_t data_size_;
+@@ -300,50 +316,37 @@ namespace hnswlib {
+             return result;
+         }
+ 		
+-		void rotation_(int vecsize, int dim_, float** data, float* data2, float* R){
+-			
+-                    #pragma omp parallel for		
+-			for(int i = 0; i < vecsize; i++){
+-                            float* data3 = new float[dim_]; 
+-		        for(int j = 0; j < dim_; j++){
+-			        data3[j] = 0;
+-			        //for(int l = 0; l < dim_; l++){
+-			            //data2[j] += R[j * dim_ + l] * data[i][l];	
+-						data3[j] = fstdistfunc_( (const void*) (R + j * dim_), (const void*) (data[i]), dist_func_param2_);	
+-			        //}
+-		        }
+-		
+-		        for(int l = 0; l < dim_; l++){
+-			        data[i][l] = data3[l];
+-		        }
+-				delete[] data3;
+-	        }			
+-		}
+-			
+-
+-        void restore_index(float *query_data, float* array0, float* book, 
+-            float** start_book, unsigned char*** merge, unsigned char** merge0, int* length, int* sdim, int tol_dim, float* temp_arr){
+-	        
+-		//printf("restore1\n");	
+-            float* temp_arr2 = new float[sdim[0]];
+-
+-            int base_dim = sdim[0];
+-		
+-	        float* ind2 = array0 ;
+-			
+-	        for(int j = 0; j < base_dim; j++){
+-		        temp_arr2[j] = fstdistfunc_( (const void*) ind2, (const void*) query_data, dist_func_param_);
+-                ind2 += tol_dim;			
+-	        }   
+- 
+-	        for(int j = 0; j < L; j++){
+-		        _mm_prefetch(ind2, _MM_HINT_T0);
++        void rotation_(int vecsize, int dim, float** data, float*, float* rotation) {
++            #pragma omp parallel
++            {
++                std::vector<float> rotated(dim);
++                #pragma omp for
++                for (int row = 0; row < vecsize; ++row) {
++                    for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++                        rotated[dim_idx] = fstdistfunc_(rotation + size_t(dim_idx) * dim,
++                                                       data[row], dist_func_param2_);
++                    std::copy(rotated.begin(), rotated.end(), data[row]);
++                }
++            }
++        }
+ 
+-		        book[j] = compare_(ind2, temp_arr2, base_dim);
++        void computeDistanceTable(const float* query, const float* packed, float* book,
++                                  int subdim, int padded_dim, float* rotated) const {
++            for (int row = 0; row < subdim; ++row) {
++                rotated[row] = fstdistfunc_(packed, query, dist_func_param_);
++                packed += padded_dim;
++            }
++            for (int center = 0; center < L; ++center) {
++                _mm_prefetch(packed, _MM_HINT_T0);
++                book[center] = compare_(packed, rotated, subdim);
++                packed += subdim;
++            }
++        }
+ 
+-	            ind2 += base_dim;		
+-	        }
+-           	
++        void restore_index(float* query, float* packed, float* book,
++                           float**, unsigned char***, unsigned char**, int*, int* subdims,
++                           int padded_dim, float* scratch) {
++            computeDistanceTable(query, packed, book, subdims[0], padded_dim, scratch);
+         }
+ 
+         std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst>		
+@@ -842,7 +845,7 @@ namespace hnswlib {
+ 			quan_size_ = new size_t[max_level_];
+             size_quan_per_element_ = new size_t[max_level_];
+ 			quan_offset_ = new size_t[max_level_];
+-			quan_level0_memory_ = new char* [max_level_];
++			quan_level0_memory_ = new char* [max_level_]{};
+ 			
+ 			for (int i = 0; i < max_level_; i++)
+ 			    length[i] = pow(2, max_level_ -i + OFF);
+@@ -974,37 +977,35 @@ namespace hnswlib {
+ 		}
+ 
+ 		
+-		void deleteLinklist(int ii, std::string location){
+-			for(int i = 0; i < max_elements_; i++){
+-                if (element_levels_[i] > 0){
+-                    free(linkLists_[i]);
+-					element_levels_[i] = 0;
+-				}					
+-			}
+-			
+-                        if(ii == -1){
+-                               std::ofstream output(location, std::ios::binary);
++        // Complete a layer without serializing or releasing the original-vector graph.
++        void finishLayer(int level) {
++            for (size_t id = 0; id < element_levels_.size(); ++id)
++                if (element_levels_[id] > 0) {
++                    free(linkLists_[id]);
++                    element_levels_[id] = 0;
++                }
++            const int next = level + 1;
++            if (next < max_level_) {
++                quan_size_[next] = length[next] * sizeof(unsigned char);
++                size_quan_per_element_[next] = size_quan_level0_ + quan_size_[next] + sizeof(labeltype);
++                quan_offset_[next] = size_quan_level0_ + quan_size_[next];
++                quan_level0_memory_[next] = static_cast<char*>(malloc(max_elements_ * size_quan_per_element_[next]));
++                if (!quan_level0_memory_[next]) throw std::bad_alloc();
++            }
++        }
+ 
+-                                   writeBinaryPOD(output, max_elements_);
+-                                 writeBinaryPOD(output, size_data_per_element_);
+-                                output.write(data_level0_memory_, max_elements_ * size_data_per_element_);
+-                                output.close();
++        void deleteLinklist(int level, std::string location) {
++            finishLayer(level);
++            if (level == -1) {
++                std::ofstream output(location, std::ios::binary);
++                writeBinaryPOD(output, max_elements_);
++                writeBinaryPOD(output, size_data_per_element_);
++                output.write(data_level0_memory_, max_elements_ * size_data_per_element_);
++                free(data_level0_memory_);
++                data_level0_memory_ = nullptr;
++            }
++        }
+ 
+-				free(data_level0_memory_);
+-			    data_level0_memory_ = NULL;
+-			}
+-			
+-			int k = ii + 1;
+-            if(k <= max_level_ - 1){
+-			    quan_size_[k] = length[k] * sizeof(unsigned char);	
+-				size_quan_per_element_[k] = size_quan_level0_ + quan_size_[k] + sizeof(labeltype);
+-				quan_offset_[k] = size_quan_level0_ + quan_size_[k];
+-				quan_level0_memory_[k] = (char *) malloc(max_elements_ * size_quan_per_element_[k]);
+-                if (quan_level0_memory_[k] == nullptr)
+-                throw std::runtime_error("Not enough memory");				
+-          	}		
+-		}
+-		
+ 		//-----------------------------------------------------------------
+         tableint addPoint(const void *data_point, labeltype label, int level, float*** book, int level2, bool flag) {	
+ 		tableint cur_c = 0;
+@@ -1423,8 +1424,9 @@ namespace hnswlib {
+         }
+ 
+ 
+-void SearchWithsingleGraph(float** book_, int X, unsigned* points, 
+-    unsigned* enter_point, unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_) {
++void SearchWithsingleGraph(float** book_, int X, const unsigned* points,
++    unsigned* enter_point, const unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_,
++    std::vector<Neighbor>* workspace = nullptr) {
+   //unsigned L = parameters.Get<unsigned>("L_search");
+   unsigned LL = ef;
+    VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+@@ -1440,7 +1442,9 @@ void SearchWithsingleGraph(float** book_, int X, unsigned* points,
+   else{
+ 	fan_new = fan;
+   }
+-  std::vector<Neighbor> retset(LL + 1);
++  std::vector<Neighbor> local_candidates;
++  auto& retset = workspace ? *workspace : local_candidates;
++  retset.assign(LL + 1, Neighbor{});
+   
+   size_t quan_len_ = quan_size_[0];
+   size_t size_quan_per_element = size_quan_per_element_[0];
+@@ -1506,8 +1510,9 @@ void SearchWithsingleGraph(float** book_, int X, unsigned* points,
+ 
+ 
+ 
+-void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_point, 
+-        unsigned int* trans, size_t ef, char* fflag, int level, VisitedListPool *visited_list_pool_) {
++void SearchWithquanGraph(float** book_, int X, const unsigned* points, elem* init_point,
++        const unsigned int* trans, size_t ef, const char* fflag, int level, VisitedListPool *visited_list_pool_,
++    std::vector<Neighbor>* workspace = nullptr) {
+  // unsigned L = parameters.Get<unsigned>("L_search");
+      unsigned LL = ef;
+     VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+@@ -1523,7 +1528,9 @@ void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_poin
+   else{
+ 	fan_new = fan;
+   }
+-  std::vector<Neighbor> retset(LL + 1);
++  std::vector<Neighbor> local_candidates;
++  auto& retset = workspace ? *workspace : local_candidates;
++  retset.assign(LL + 1, Neighbor{});
+ 
+   size_t quan_len_ = quan_size_[level];
+   size_t size_quan_per_element = size_quan_per_element_[level];
+@@ -1597,8 +1604,9 @@ void SearchWithquanGraph(float** book_, int X, unsigned* points, elem* init_poin
+   visited_list_pool_->releaseVisitedList(vl); 
+ }
+ 
+-void SearchWithquanGraph2(float** book_, int X, elem* points, 
+-    unsigned* init_point, unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_) {
++void SearchWithquanGraph2(float** book_, int X, const elem* points,
++    unsigned* init_point, const unsigned int* trans, size_t ef, VisitedListPool *visited_list_pool_,
++    std::vector<Neighbor>* workspace = nullptr) {
+     unsigned LL = ef;
+ 
+    VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+@@ -1606,7 +1614,9 @@ void SearchWithquanGraph2(float** book_, int X, elem* points,
+    vl_type visited_array_tag = vl->curV; 
+    
+   float dist, sum;
+-   std::vector<Neighbor> retset(LL + 1);
++   std::vector<Neighbor> local_candidates;
++  auto& retset = workspace ? *workspace : local_candidates;
++  retset.assign(LL + 1, Neighbor{});
+  
+ 	size_t quan_len_ = quan_size_[0];
+     size_t size_quan_per_element = size_quan_per_element_[0];
+@@ -1679,8 +1689,9 @@ void SearchWithquanGraph2(float** book_, int X, elem* points,
+   visited_list_pool_->releaseVisitedList(vl); 
+ }
+ 
+-void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point, 
+-    unsigned int* trans, size_t ef, char* fflag, int level, VisitedListPool *visited_list_pool_) {
++void SearchWithquanGraph3(float** book_, int X, const elem* points, elem* init_point,
++    const unsigned int* trans, size_t ef, const char* fflag, int level, VisitedListPool *visited_list_pool_,
++    std::vector<Neighbor>* workspace = nullptr) {
+   unsigned LL = ef;
+   
+      VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+@@ -1688,7 +1699,9 @@ void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point,
+    vl_type visited_array_tag = vl->curV;  
+ 
+   float dist, sum;
+-   std::vector<Neighbor> retset(LL + 1);
++   std::vector<Neighbor> local_candidates;
++  auto& retset = workspace ? *workspace : local_candidates;
++  retset.assign(LL + 1, Neighbor{});
+   
+ 	size_t quan_len_ = quan_size_[level];
+     size_t size_quan_per_element = size_quan_per_element_[level];
+@@ -1770,13 +1783,15 @@ void SearchWithquanGraph3(float** book_, int X, elem* points, elem* init_point,
+ }
+ 
+ 
+-void SearchWithOptGraph(const float *query, size_t K, size_t ef, 
+-        unsigned *indices, unsigned *init_point, VisitedListPool *visited_list_pool_) {
++void SearchWithOptGraph(const float *query, size_t K, size_t ef,
++        unsigned *indices, const unsigned *init_point, VisitedListPool *visited_list_pool_,
++    std::vector<Neighbor>* workspace = nullptr) {
+ 
+   unsigned LL = ef;
+ 
+-  std::vector<Neighbor> retset(LL + 1);
+-  std::vector<unsigned> init_ids(LL);
++  std::vector<Neighbor> local_candidates;
++  auto& retset = workspace ? *workspace : local_candidates;
++  retset.assign(LL + 1, Neighbor{});
+ 
+      VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+    vl_type *visited_array = vl->mass;
+diff --git a/hnsw/hvs.cpp b/hnsw/hvs.cpp
+new file mode 100644
+index 0000000..1bed613
+--- /dev/null
++++ b/hnsw/hvs.cpp
+@@ -0,0 +1,532 @@
++#include "hvs.hpp"
++#include "quantizer.hpp"
++#include <algorithm>
++#include <array>
++#include <climits>
++#include <cmath>
++#include <cstdlib>
++#include <fstream>
++#include <mutex>
++#include <stdexcept>
++#include <omp.h>
++#include "hnswlib/hnswlib.h"
++
++#undef L
++#undef OFF
++#undef min_book
++#undef cen
++#undef nnum
++#undef fan
++#undef KK
++#undef size_n
++
++namespace hvs {
++namespace {
++using namespace detail;
++using Graph = hnswlib::HierarchicalNSW<float>;
++constexpr int start_books = 4, entry_points = 10, offset = 3;
++
++// Non-owning row pointers are only needed at the original graph API boundary.
++template <class T> std::vector<T *> row_pointers(cv::Mat_<T> &matrix) {
++    std::vector<T *> rows(matrix.rows);
++    for (int row = 0; row < matrix.rows; ++row)
++        rows[row] = matrix[row];
++    return rows;
++}
++
++struct Representative {
++    const unsigned char *code;
++    int id;
++    float error;
++};
++} // namespace
++
++struct Index::Impl {
++    const int n, dimension, levels, width;
++    std::vector<int> lengths, subdimensions, counts;
++    std::vector<std::vector<unsigned char>> merges;
++    std::vector<std::vector<char>> flags;
++    std::vector<std::vector<unsigned>> transitions;
++    std::array<unsigned char, start_books * start_centroids * merged_books> start_merges{};
++    std::vector<unsigned> connections;
++    std::vector<float> packed_codebooks;
++    hnswlib::L2Space space;
++    std::unique_ptr<Graph> graph;
++
++    Impl(int size, int dim, int depth)
++        : n(size), dimension(dim), levels(depth),
++          width(((dim + (1 << (depth + offset)) - 1) >> (depth + offset)) << (depth + offset)),
++          lengths(depth), subdimensions(depth), counts(depth), merges(depth), flags(depth),
++          transitions(depth),
++          connections(start_centroids * start_centroids * start_centroids * start_centroids * entry_points),
++          space(dim, width) {
++        for (int level = 0; level < levels; ++level) {
++            lengths[level] = 1 << (levels - level + offset);
++            subdimensions[level] = width / lengths[level];
++            merges[level].resize(lengths[level] * 2 * codewords);
++        }
++    }
++
++    void build(const float *base, const BuildConfig &config);
++};
++
++void Index::Impl::build(const float *base, const BuildConfig &config) {
++    const int samples = std::min(config.training_samples, n);
++    const int blocks = lengths[0], subdim = subdimensions[0];
++    if (samples < width)
++        throw std::invalid_argument("HVS needs at least as many training samples as padded dimensions");
++    std::srand(config.seed);
++    cv::setRNGSeed(config.seed);
++    graph =
++        std::make_unique<Graph>(levels, &space, n, dimension, config.M, config.ef_construction, config.seed);
++    cv::Mat1f training(samples, width, 0.0f), data(n, width, 0.0f);
++    for (int row = 0; row < samples; ++row)
++        std::copy_n(base + size_t(row) * (n / samples) * dimension, dimension, training[row]);
++    for (int row = 0; row < n; ++row)
++        std::copy_n(base + size_t(row) * dimension, dimension, data[row]);
++    std::vector<std::vector<cv::Mat1f>> books(levels);
++    std::vector<cv::Mat1b> codes(levels);
++    for (int level = 0; level < levels; ++level) {
++        books[level].resize(lengths[level]);
++        codes[level].create(n, lengths[level]);
++    }
++
++    graph->addPoint(base, 0, nullptr, -1, true);
++#pragma omp parallel for
++    for (int row = 1; row < n; ++row)
++        graph->addPoint(base + size_t(row) * dimension, row, nullptr, -1, false);
++    std::vector<float> density(n);
++    cv::Mat1i labels(levels + 1, n);
++    auto label_rows = row_pointers(labels);
++    graph->est_density(density.data(), n, dimension);
++    graph->permutation(label_rows.data(), n, levels, nullptr, -1);
++    graph->finishLayer(-1);
++
++    // Native PCA initialization balances eigenvalue products across subspaces.
++    cv::Mat1f raw = training.t();
++    cv::PCA pca(raw, cv::noArray(), cv::PCA::DATA_AS_COL, width);
++    cv::Mat1f initial_rotation(width, width), rotation, rotated;
++    std::vector<RankedPoint> products(blocks);
++    std::vector<int> used(blocks), order(width);
++    for (int dim_idx = 0; dim_idx < width; ++dim_idx) {
++        const float value = pca.eigenvalues.at<float>(dim_idx);
++        if (dim_idx < blocks) {
++            products[dim_idx] = {dim_idx, value};
++            used[dim_idx] = 1;
++            order[dim_idx] = dim_idx * subdim;
++        } else {
++            std::sort(products.begin(), products.end());
++            for (auto &product : products)
++                if (used[product.id] < subdim) {
++                    order[dim_idx] = product.id * subdim + used[product.id]++;
++                    product.distance *= value;
++                    break;
++                }
++        }
++    }
++    for (int row = 0; row < width; ++row) {
++        const float *eigenvector = pca.eigenvectors.ptr<float>(row);
++        float norm = 0;
++        for (int dim_idx = 0; dim_idx < width; ++dim_idx)
++            norm += eigenvector[dim_idx] * eigenvector[dim_idx];
++        for (int dim_idx = 0; dim_idx < width; ++dim_idx)
++            initial_rotation(order[row], dim_idx) = eigenvector[dim_idx] / std::sqrt(norm);
++    }
++    cv::gemm(initial_rotation, raw, 1, cv::noArray(), 0, rotated);
++    cv::transpose(rotated, training);
++    auto train_bottom = [&] {
++        for (int block = 0; block < blocks; ++block)
++            kmeans(training.colRange(block * subdim, (block + 1) * subdim), books[0][block]);
++    };
++    train_bottom();
++
++    // Two native OPQ passes, ten centroid updates per pass and one SVD rotation.
++    cv::Mat1f encoded(width, samples);
++    std::vector<int> assigned(samples), cluster_sizes(codewords);
++    for (int pass = 0; pass < 2; ++pass) {
++        for (int block = 0; block < blocks; ++block) {
++            auto &centers = books[0][block];
++            for (int round = 0; round < 10; ++round) {
++                for (int row = 0; row < samples; ++row)
++                    assigned[row] = nearest(training[row] + block * subdim, centers);
++                for (int row = 0; row < samples; ++row)
++                    std::fill_n(centers[assigned[row]], subdim, 0);
++                std::fill(cluster_sizes.begin(), cluster_sizes.end(), 0);
++                for (int row = 0; row < samples; ++row) {
++                    for (int dim_idx = 0; dim_idx < subdim; ++dim_idx)
++                        centers(assigned[row], dim_idx) += training(row, block * subdim + dim_idx);
++                    ++cluster_sizes[assigned[row]];
++                }
++                for (int center = 0; center < codewords; ++center)
++                    if (cluster_sizes[center])
++                        for (int dim_idx = 0; dim_idx < subdim; ++dim_idx)
++                            centers(center, dim_idx) /= cluster_sizes[center];
++            }
++            for (int row = 0; row < samples; ++row)
++                for (int dim_idx = 0; dim_idx < subdim; ++dim_idx)
++                    encoded(block * subdim + dim_idx, row) = centers(assigned[row], dim_idx);
++        }
++        if (pass == 1)
++            break;
++        cv::Mat1f cross, step;
++        cv::gemm(rotated, encoded, 1, cv::noArray(), 0, cross, cv::GEMM_2_T);
++        cv::SVD svd(cross, cv::SVD::FULL_UV);
++        cv::gemm(svd.u, svd.vt, 1, cv::noArray(), 0, step);
++        cv::gemm(step, initial_rotation, 1, cv::noArray(), 0, rotation, cv::GEMM_1_T);
++        cv::gemm(rotation, raw, 1, cv::noArray(), 0, rotated);
++        cv::transpose(rotated, training);
++    }
++
++    auto merge_level = [&](int level) {
++        const int half = subdimensions[level - 1], dim = subdimensions[level];
++        cv::Mat1f candidates(codewords * codewords, dim);
++        for (int block = 0; block < lengths[level]; ++block) {
++            for (int left = 0; left < codewords; ++left)
++                for (int right = 0; right < codewords; ++right) {
++                    std::copy_n(books[level - 1][2 * block][left], half,
++                                candidates[left * codewords + right]);
++                    std::copy_n(books[level - 1][2 * block + 1][right], half,
++                                candidates[left * codewords + right] + half);
++                }
++            auto *merge = merges[level].data() + block * 2 * codewords;
++            merge_quantizers(candidates, books[level][block], merge,
++                             training.colRange(block * dim, (block + 1) * dim));
++            for (int center = 0; center < codewords; ++center)
++                candidates.row(merge[2 * center] * codewords + merge[2 * center + 1])
++                    .copyTo(books[level][block].row(center));
++        }
++    };
++
++    // Pair correlated subspaces. A row permutation avoids a dense permutation matrix.
++    for (int level = 1; level < levels; ++level) {
++        const int count = lengths[level - 1], dim = subdimensions[level - 1];
++        cv::Mat1i assignment(count, samples), sizes(count, codewords, 0), joint(codewords, codewords);
++        std::vector<unsigned char> paired(count);
++        std::vector<RankedPoint> ranked(count * count, {-1, 0});
++        for (int block = 0; block < count; ++block)
++            for (int row = 0; row < samples; ++row) {
++                const int id = nearest(training[row] + block * dim, books[level - 1][block]);
++                assignment(block, row) = id;
++                ++sizes(block, id);
++            }
++        for (int left = 0; left < count; ++left)
++            for (int right = left + 1; right < count; ++right) {
++                joint.setTo(0);
++                for (int row = 0; row < samples; ++row)
++                    ++joint(assignment(left, row), assignment(right, row));
++                float score = 0;
++                for (int first = 0; first < codewords; ++first) {
++                    if (!sizes(left, first))
++                        continue;
++                    for (int second = 0; second < codewords; ++second)
++                        if (joint(first, second) && sizes(right, second))
++                            score += joint(first, second) *
++                                     std::log(double(samples) * joint(first, second) / sizes(left, first) /
++                                              sizes(right, second)) /
++                                     samples;
++                }
++                ranked[left * count + right] = {left * count + right, score};
++            }
++        std::sort(ranked.begin(), ranked.end());
++        cv::Mat1f reordered_rotation(width, width);
++        std::vector<cv::Mat1f> reordered;
++        for (auto point = ranked.rbegin(); point != ranked.rend(); ++point) {
++            if (point->id < 0)
++                continue;
++            const int left = point->id / count, right = point->id % count;
++            if (paired[left] || paired[right])
++                continue;
++            paired[left] = paired[right] = 1;
++            for (int child : {left, right}) {
++                const int next = int(reordered.size());
++                rotation.rowRange(child * dim, (child + 1) * dim)
++                    .copyTo(reordered_rotation.rowRange(next * dim, (next + 1) * dim));
++                reordered.push_back(books[level - 1][child]);
++            }
++        }
++        rotation = std::move(reordered_rotation);
++        cv::gemm(rotation, raw, 1, cv::noArray(), 0, rotated);
++        cv::transpose(rotated, training);
++        if (level == levels - 1)
++            break;
++        books[level - 1] = std::move(reordered);
++        merge_level(level);
++    }
++    train_bottom();
++    for (int level = 1; level < levels; ++level)
++        merge_level(level);
++    for (int block = 0; block < start_books; ++block)
++        build_start_merges(books.back(), block, start_merges.data() + block * start_centroids * merged_books,
++                           training.colRange(block * width / start_books, (block + 1) * width / start_books));
++    auto data_rows = row_pointers(data);
++    graph->rotation_(n, width, data_rows.data(), nullptr, rotation[0]);
++
++    // The density order is identical at every layer.
++    std::vector<RankedPoint> ranked(n);
++    for (int id = 0; id < n; ++id)
++        ranked[id] = {id, density[id]};
++    std::sort(ranked.begin(), ranked.end());
++    cv::Mat1b selected(levels, n, uchar(0)), eligible(levels, n, uchar(0));
++    eligible.row(levels - 1).setTo(1);
++    const size_t buckets = size_t(levels) * codewords * codewords;
++    std::vector<std::vector<Representative>> representatives(buckets);
++    std::vector<std::mutex> locks(buckets);
++    auto bucket = [](int level, const unsigned char *code) {
++        return level * codewords * codewords + code[0] * codewords + code[1];
++    };
++    int cut = n;
++    for (int level = levels - 1; level >= 0; --level) {
++        std::vector<float> errors(n);
++#pragma omp parallel for
++        for (int id = 0; id < n; ++id)
++            for (int block = 0; block < lengths[level]; ++block) {
++                const auto *point = data[id] + block * subdimensions[level];
++                const int center = nearest(point, books[level][block]);
++                codes[level](id, block) = center;
++                errors[id] += squared_l2(point, books[level][block][center], subdimensions[level]);
++            }
++        if (level < levels - 1) {
++            int kept = 0;
++            for (auto point = ranked.rbegin(); point != ranked.rend(); ++point)
++                if (eligible(level + 1, point->id)) {
++                    eligible(level, point->id) = 1;
++                    if (++kept >= cut)
++                        break;
++                }
++        }
++        cut = config.delta * cut;
++#pragma omp parallel for
++        for (int id = 0; id < n; ++id) {
++            if (!eligible(level, id))
++                continue;
++            const auto *code = codes[level][id];
++            const int slot = bucket(level, code);
++            std::lock_guard<std::mutex> lock(locks[slot]);
++            auto &group = representatives[slot];
++            auto found = std::find_if(group.begin(), group.end(), [&](const Representative &other) {
++                return std::equal(code + 2, code + lengths[level], other.code + 2);
++            });
++            if (found == group.end()) {
++                group.push_back({code, id, errors[id]});
++                selected(level, id) = 1;
++            } else if (errors[id] < found->error) {
++                selected(level, found->id) = 0;
++                *found = {code, id, errors[id]};
++                selected(level, id) = 1;
++            }
++        }
++        counts[level] = cv::countNonZero(selected.row(level));
++        if (counts[level] < entry_points)
++            throw std::runtime_error(
++                "HVS needs at least ten representatives per layer; increase delta or reduce T");
++    }
++
++    cv::Mat1i targets(levels, n, 0);
++    for (int level = levels - 1; level > 0; --level)
++        for (int id = 0; id < n; ++id) {
++            if (!selected(level, id))
++                continue;
++            targets(level, id) = id;
++            if (!eligible(level - 1, id))
++                continue;
++            const auto *code = codes[level - 1][id];
++            for (const auto &candidate : representatives[bucket(level - 1, code)])
++                if (std::equal(code + 2, code + lengths[level - 1], candidate.code + 2)) {
++                    targets(level, id) = candidate.id;
++                    break;
++                }
++        }
++    cv::Mat1b next_is_quantized(levels, n, uchar(0)), compact_flags(levels, n, uchar(0));
++    std::vector<int> compact_ids(n);
++    for (int level = 0; level < levels; ++level) {
++        int compact = 0;
++        for (int id = 0; id < n; ++id)
++            if (selected(level, id)) {
++                compact_ids[id] = compact;
++                if (level == 0)
++                    targets(0, compact) = id;
++                ++compact;
++            }
++        if (level + 1 < levels)
++            for (int id = 0; id < n; ++id)
++                if (selected(level + 1, id) && eligible(level, id)) {
++                    targets(level + 1, id) = compact_ids[targets(level + 1, id)];
++                    next_is_quantized(level + 1, id) = 1;
++                }
++        if (level > 0) {
++            compact = 0;
++            for (int id = 0; id < n; ++id)
++                if (selected(level, id)) {
++                    compact_flags(level, compact) = next_is_quantized(level, id);
++                    targets(level, compact++) = targets(level, id);
++                }
++        }
++    }
++
++    // Only one layer's pairwise distance tables need to be resident at a time.
++    std::vector<cv::Mat1f> distances;
++    std::vector<std::vector<float *>> distance_rows;
++    std::vector<float **> distance_books;
++    for (int level = 0; level < levels; ++level) {
++        distances.resize(lengths[level]);
++        distance_rows.resize(lengths[level]);
++        distance_books.resize(lengths[level]);
++        for (int block = 0; block < lengths[level]; ++block) {
++            distances[block].create(codewords, codewords);
++            for (int left = 0; left < codewords; ++left)
++                for (int right = 0; right < codewords; ++right)
++                    distances[block](left, right) = squared_l2(
++                        books[level][block][left], books[level][block][right], subdimensions[level]);
++            distance_rows[block] = row_pointers(distances[block]);
++            distance_books[block] = distance_rows[block].data();
++        }
++        std::vector<int> ids;
++        for (int id = 0; id < n; ++id)
++            if (selected(level, id))
++                ids.push_back(id);
++        graph->addPoint(codes[level][ids[0]], 0, distance_books.data(), level, true);
++#pragma omp parallel for
++        for (int id = 1; id < int(ids.size()); ++id)
++            graph->addPoint(codes[level][ids[id]], id, distance_books.data(), level, false);
++        if (level + 1 < levels)
++            graph->finishLayer(level);
++    }
++    graph->permutation(label_rows.data(), n, levels, counts.data(), 0);
++    for (int level = 0; level < levels; ++level) {
++        flags[level].resize(counts[level]);
++        transitions[level].resize(counts[level]);
++        for (int id = 0; id < counts[level]; ++id) {
++            const int internal = labels(level + 1, id);
++            const bool quantized = compact_flags(level, id);
++            flags[level][internal] = quantized;
++            transitions[level][internal] = labels(quantized ? level : 0, targets(level, id));
++        }
++    }
++
++    // connect() only reads the completed graph; each cell owns its route and output.
++    graph->setEf(200);
++#pragma omp parallel for schedule(static)
++    for (size_t cell = 0; cell < connections.size() / entry_points; ++cell) {
++        std::array<unsigned char, start_books * merged_books> route;
++        size_t remainder = cell;
++        for (int block = start_books - 1; block >= 0; --block) {
++            const size_t centroid = remainder % start_centroids;
++            remainder /= start_centroids;
++            std::copy_n(start_merges.data() + (block * start_centroids + centroid) * merged_books,
++                        merged_books, route.data() + block * merged_books);
++        }
++        graph->connect(route.data(), distance_books.data(), connections.data() + cell * entry_points,
++                       levels - 1, false);
++    }
++    graph->finishLayer(levels - 1);
++
++    packed_codebooks.resize(size_t(width) * (width + codewords));
++    for (int block = 0; block < blocks; ++block) {
++        float *out = packed_codebooks.data() + size_t(block) * subdim * (width + codewords);
++        std::copy_n(rotation[block * subdim], size_t(subdim) * width, out);
++        std::copy_n(books[0][block][0], codewords * subdim, out + size_t(subdim) * width);
++    }
++}
++
++struct Index::QueryScratch::Impl {
++    const Index::Impl *owner;
++    const size_t capacity;
++    std::vector<float> query, rotated;
++    std::vector<cv::Mat1f> books;
++    std::vector<std::vector<float *>> rows;
++    std::array<float, start_books * start_centroids> start{};
++    std::vector<unsigned> entries;
++    std::vector<std::vector<elem>> intermediate;
++    std::vector<Graph::Neighbor> candidates;
++    hnswlib::VisitedListPool visited;
++
++    Impl(const Index::Impl &index, size_t queue)
++        : owner(&index), capacity(queue), query(index.width, 0), rotated(index.subdimensions[0]),
++          books(index.levels), rows(index.levels), entries(queue), intermediate(index.levels),
++          candidates(queue + 1), visited(1, index.n) {
++        for (int level = 0; level < index.levels; ++level) {
++            books[level].create(index.lengths[level], codewords);
++            rows[level] = row_pointers(books[level]);
++            intermediate[level].resize(queue);
++        }
++    }
++};
++
++Index::Index(const float *base, size_t size, size_t dim, const BuildConfig &config)
++    : n(size), dimension(dim) {
++    if (!base || size < 257 || size > INT_MAX || dim == 0 || dim > INT_MAX - 128 || config.T < 1 ||
++        config.T > 4 || !(config.delta > 0 && config.delta <= 1) || config.M < 2 || config.M >= int(size) ||
++        config.ef_construction < config.M || config.training_samples < 257)
++        throw std::invalid_argument("Invalid HVS dimensions/count or build parameters");
++    impl_ = std::make_unique<Impl>(int(size), int(dim), config.T);
++    impl_->build(base, config);
++}
++Index::~Index() = default;
++size_t Index::max_search_queue() const {
++    return *std::min_element(impl_->counts.begin(), impl_->counts.end());
++}
++Index::QueryScratch::QueryScratch(const Index &index, size_t max_queue) {
++    if (max_queue == 0 || max_queue > index.max_search_queue())
++        throw std::invalid_argument("HVS query scratch capacity exceeds a representative layer");
++    impl_ = std::make_unique<Impl>(*index.impl_, max_queue);
++}
++Index::QueryScratch::~QueryScratch() = default;
++
++void Index::search(const float *query, size_t topk, size_t queue, unsigned *output,
++                   QueryScratch &work) const {
++    auto &scratch = *work.impl_;
++    if (!query || !output || scratch.owner != impl_.get() || topk == 0 || topk > queue ||
++        queue > scratch.capacity)
++        throw std::invalid_argument("Invalid HVS query, topk, queue or scratch owner");
++    const auto &index = *impl_;
++    auto &graph = *index.graph;
++    const int subdim = index.subdimensions[0];
++    std::copy_n(query, dimension, scratch.query.data());
++    for (int block = 0; block < index.lengths[0]; ++block)
++        graph.computeDistanceTable(scratch.query.data(),
++                                   index.packed_codebooks.data() +
++                                       size_t(block) * subdim * (index.width + codewords),
++                                   scratch.rows[0][block], subdim, index.width, scratch.rotated.data());
++    for (int level = 1; level < index.levels; ++level)
++        for (int block = 0; block < index.lengths[level]; ++block)
++            for (int center = 0; center < codewords; ++center) {
++                const auto *merge = index.merges[level].data() + block * 2 * codewords;
++                scratch.books[level](block, center) =
++                    scratch.books[level - 1](2 * block, merge[2 * center]) +
++                    scratch.books[level - 1](2 * block + 1, merge[2 * center + 1]);
++            }
++    scratch.start.fill(0);
++    unsigned cell = 0;
++    for (int block = 0; block < start_books; ++block) {
++        for (int center = 0; center < start_centroids; ++center)
++            for (int part = 0; part < merged_books; ++part)
++                scratch.start[block * start_centroids + center] += scratch.books.back()(
++                    block * merged_books + part,
++                    index.start_merges[(block * start_centroids + center) * merged_books + part]);
++        const auto begin = scratch.start.begin() + block * start_centroids;
++        cell = cell * start_centroids + unsigned(std::min_element(begin, begin + start_centroids) - begin);
++    }
++    const auto *points = index.connections.data() + cell * entry_points;
++    if (index.levels == 1) {
++        graph.SearchWithsingleGraph(scratch.rows[0].data(), index.lengths[0], points, scratch.entries.data(),
++                                    index.transitions[0].data(), queue, &scratch.visited,
++                                    &scratch.candidates);
++    } else {
++        graph.SearchWithquanGraph(scratch.rows.back().data(), index.lengths.back(), points,
++                                  scratch.intermediate[index.levels - 2].data(),
++                                  index.transitions.back().data(), queue, index.flags.back().data(),
++                                  index.levels - 1, &scratch.visited, &scratch.candidates);
++        for (int level = index.levels - 2; level >= 1; --level)
++            graph.SearchWithquanGraph3(
++                scratch.rows[level].data(), index.lengths[level], scratch.intermediate[level].data(),
++                scratch.intermediate[level - 1].data(), index.transitions[level].data(), queue,
++                index.flags[level].data(), level, &scratch.visited, &scratch.candidates);
++        graph.SearchWithquanGraph2(scratch.rows[0].data(), index.lengths[0], scratch.intermediate[0].data(),
++                                   scratch.entries.data(), index.transitions[0].data(), queue,
++                                   &scratch.visited, &scratch.candidates);
++    }
++    graph.SearchWithOptGraph(query, topk, queue, output, scratch.entries.data(), &scratch.visited,
++                             &scratch.candidates);
++}
++
++} // namespace hvs
+diff --git a/hnsw/hvs.hpp b/hnsw/hvs.hpp
+new file mode 100644
+index 0000000..2961b79
+--- /dev/null
++++ b/hnsw/hvs.hpp
+@@ -0,0 +1,45 @@
++#pragma once
++#include <cstddef>
++#include <memory>
++
++namespace hvs {
++
++struct BuildConfig {
++    int T = 1;
++    float delta = 0.5f;
++    int M = 16;
++    int ef_construction = 500;
++    int training_samples = 10000;
++    int seed = 100;
++};
++
++// Builds and owns the original-vector graph, quantized layers and routing tables.
++// Input vectors need only remain valid during construction. No files are accessed.
++class Index {
++    struct Impl;
++    std::unique_ptr<Impl> impl_;
++
++  public:
++    const std::size_t n, dimension;
++    Index(const float *base, std::size_t size, std::size_t dim, const BuildConfig &config = {});
++    ~Index();
++    std::size_t max_search_queue() const;
++
++    // Allocate once per worker; reuse for all queries of this index. Different
++    // workers can search the same index concurrently with distinct scratch objects.
++    class QueryScratch {
++        friend class Index;
++        struct Impl;
++        std::unique_ptr<Impl> impl_;
++
++      public:
++        QueryScratch(const Index &index, std::size_t max_queue);
++        ~QueryScratch();
++    };
++
++    // Require 0 < topk <= queue <= min(max_search_queue(), scratch capacity).
++    void search(const float *query, std::size_t topk, std::size_t queue, unsigned *output,
++                QueryScratch &scratch) const;
++};
++
++} // namespace hvs
+diff --git a/hnsw/quantizer.cpp b/hnsw/quantizer.cpp
+new file mode 100644
+index 0000000..33ba1fc
+--- /dev/null
++++ b/hnsw/quantizer.cpp
+@@ -0,0 +1,126 @@
++#include "quantizer.hpp"
++#include <algorithm>
++#include <cmath>
++#include <cstdlib>
++#include <stdexcept>
++
++namespace hvs::detail {
++
++void kmeans(const cv::Mat1f &samples, cv::Mat1f &centers, int count) {
++    const int num_samples = samples.rows, dim = samples.cols;
++    centers.create(count, dim);
++    cv::Mat1f sums(count, dim);
++    std::vector<int> sizes(count);
++    for (int center = 0; center < count; ++center)
++        samples.row(int((num_samples - 1) * (double(center) / count))).copyTo(centers.row(center));
++    // Native evenly spaced initialization, five Lloyd steps, unchanged empty centers.
++    for (int round = 0; round < 5; ++round) {
++        sums.setTo(0);
++        std::fill(sizes.begin(), sizes.end(), 0);
++        for (int row = 0; row < num_samples; ++row) {
++            const int center = nearest(samples[row], centers);
++            for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++                sums(center, dim_idx) += samples(row, dim_idx);
++            ++sizes[center];
++        }
++        for (int center = 0; center < count; ++center)
++            if (sizes[center])
++                for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++                    centers(center, dim_idx) = sums(center, dim_idx) / sizes[center];
++    }
++}
++
++void merge_quantizers(const cv::Mat1f &candidates, cv::Mat1f &centers, unsigned char *merge,
++                      const cv::Mat1f &samples) {
++    const int dim = samples.cols, half = dim / 2;
++    constexpr int pairs = codewords * codewords;
++    cv::Mat1f left(codewords, half), right(codewords, half);
++    for (int center = 0; center < codewords; ++center) {
++        candidates.row(center * codewords + center).colRange(0, half).copyTo(left.row(center));
++        candidates.row(center * codewords + center).colRange(half, dim).copyTo(right.row(center));
++    }
++    std::vector<int> weight(pairs), assigned(samples.rows), selected(codewords);
++    for (int row = 0; row < samples.rows; ++row)
++        ++weight[nearest(samples[row], left) * codewords + nearest(samples[row] + half, right)];
++    kmeans(samples, centers);
++    for (int row = 0; row < samples.rows; ++row)
++        assigned[row] = nearest(samples[row], centers);
++    std::vector<RankedPoint> ranked(pairs);
++    for (int center = 0; center < codewords; ++center) {
++        for (int pair = 0; pair < pairs; ++pair)
++            ranked[pair] = {pair, squared_l2(candidates[pair], centers[center], dim)};
++        // The native selection examines only the five nearest Cartesian-product pairs.
++        std::partial_sort(ranked.begin(), ranked.begin() + 5, ranked.end());
++        float best_error = 0;
++        for (int rank = 0; rank < 5; ++rank) {
++            const int candidate = ranked[rank].id;
++            float error = 0;
++            for (int row = 0; row < samples.rows; ++row)
++                if (assigned[row] == center)
++                    for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++                        error += (candidates(candidate, dim_idx) - samples(row, dim_idx)) *
++                                 (candidates(candidate, dim_idx) - samples(row, dim_idx));
++            if (rank == 0 || error < best_error) {
++                selected[center] = candidate;
++                best_error = error;
++            }
++        }
++        candidates.row(selected[center]).copyTo(centers.row(center));
++    }
++    std::sort(selected.begin(), selected.end());
++    std::vector<float> mean(dim), probability(pairs);
++    int occupied = 0;
++    for (int pair = 0; pair < pairs; ++pair) {
++        if (!weight[pair])
++            continue;
++        for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++            mean[dim_idx] += candidates(pair, dim_idx);
++        ++occupied;
++    }
++    for (float &value : mean)
++        value /= occupied;
++    float total = 0;
++    for (int pair = 0; pair < pairs; ++pair) {
++        for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++            probability[pair] += weight[pair] * (mean[dim_idx] - candidates(pair, dim_idx)) *
++                                 (mean[dim_idx] - candidates(pair, dim_idx));
++        total += probability[pair];
++    }
++    if (!(total > 0) || !std::isfinite(total))
++        throw std::runtime_error("HVS needs non-degenerate training samples to merge quantizers");
++    // Preserve the native integer uniform term and importance-sampling RNG order.
++    for (float &value : probability)
++        value = 1 / pairs / 2.0f + value / total / 2.0f;
++    for (int pair = 1; pair < pairs; ++pair)
++        probability[pair] += probability[pair - 1];
++    for (int center = 1; center < codewords; ++center)
++        for (int earlier = 0; earlier < center; ++earlier)
++            if (selected[center] == selected[earlier]) {
++                const double draw = std::rand() / double(RAND_MAX);
++                for (int pair = 0; pair < pairs; ++pair)
++                    if (draw <= probability[pair]) {
++                        selected[center] = pair;
++                        --center;
++                        break;
++                    }
++                break;
++            }
++    std::sort(selected.begin(), selected.end());
++    for (int center = 0; center < codewords; ++center) {
++        merge[2 * center] = selected[center] / codewords;
++        merge[2 * center + 1] = selected[center] % codewords;
++    }
++}
++
++void build_start_merges(const std::vector<cv::Mat1f> &books, int block, unsigned char *merge,
++                        const cv::Mat1f &samples) {
++    cv::Mat1f centers;
++    kmeans(samples, centers, start_centroids);
++    const int subdim = books[block * merged_books].cols;
++    for (int center = 0; center < start_centroids; ++center)
++        for (int part = 0; part < merged_books; ++part)
++            merge[center * merged_books + part] =
++                nearest(centers[center] + part * subdim, books[block * merged_books + part]);
++}
++
++} // namespace hvs::detail
+diff --git a/hnsw/quantizer.hpp b/hnsw/quantizer.hpp
+new file mode 100644
+index 0000000..d31346c
+--- /dev/null
++++ b/hnsw/quantizer.hpp
+@@ -0,0 +1,53 @@
++#pragma once
++
++#include <opencv2/core.hpp>
++#include <vector>
++
++namespace hvs::detail {
++
++inline constexpr int codewords = 256;
++inline constexpr int start_centroids = 16;
++inline constexpr int merged_books = 4;
++
++struct RankedPoint {
++    int id;
++    float distance;
++    bool operator<(const RankedPoint &other) const {
++        if (distance < other.distance)
++            return true;
++        if (distance > other.distance)
++            return false;
++        return id < other.id;
++    }
++};
++
++// Keep the original accumulation order and tie handling during training.
++inline float squared_l2(const float *left, const float *right, int dim) {
++    float distance = 0;
++    for (int dim_idx = 0; dim_idx < dim; ++dim_idx)
++        distance += (left[dim_idx] - right[dim_idx]) * (left[dim_idx] - right[dim_idx]);
++    return distance;
++}
++
++inline int nearest(const float *point, const cv::Mat1f &centers) {
++    int best = 0;
++    float distance = squared_l2(point, centers[0], centers.cols);
++    for (int center = 1; center < centers.rows; ++center) {
++        const float candidate = squared_l2(point, centers[center], centers.cols);
++        if (candidate < distance) {
++            best = center;
++            distance = candidate;
++        }
++    }
++    return best;
++}
++
++// Extracted from sift_1b.cpp's kmeans_/kmeans0_/sub_kmeans_ routines.
++// Both the original file-based demo and the in-memory index use these functions.
++void kmeans(const cv::Mat1f &samples, cv::Mat1f &centers, int count = codewords);
++void merge_quantizers(const cv::Mat1f &candidates, cv::Mat1f &centers, unsigned char *merge,
++                      const cv::Mat1f &samples);
++void build_start_merges(const std::vector<cv::Mat1f> &books, int block, unsigned char *merge,
++                        const cv::Mat1f &samples);
++
++} // namespace hvs::detail
+diff --git a/hnsw/sift_1b.cpp b/hnsw/sift_1b.cpp
+index df446a6..eeaebb9 100644
+--- a/hnsw/sift_1b.cpp
++++ b/hnsw/sift_1b.cpp
+@@ -1,15 +1,16 @@
+ #include <iostream>
++#include <algorithm>
+ #include <fstream>
+ #include <queue>
+ #include <chrono>
++#include "quantizer.hpp"
+ #include "hnswlib/hnswlib.h"
+ #include <ctime>
+ #include <cstdlib>
+ 
+ #include <unordered_set>
+ #include <opencv2/core/core.hpp>
+-#include <opencv2/highgui/highgui.hpp>
+-#include "opencv2/imgproc/imgproc.hpp"
++#include <opencv2/core/core_c.h>
+ 
+ using namespace std;
+ using namespace hnswlib;
+@@ -501,475 +502,52 @@ struct elem_{
+ 	float dist;
+ };
+ 
+-void kmeans_(
+-    float** train,
+-    float** result,
+-    int n,
+-    int d
+-){
+-        unsigned seed;
+-	float dist, min_dist;
+-	int min_id;
+-	int index;
+-	int round= 5;  //10
+-	float** temp_quan = new float*[L];  //temp array for 
+-	int* tol_quan = new int[L];  //the number of objects on each center 
+-	for(int i = 0; i < L; i++)
+-		temp_quan[i] = new float[d];
+-	
+-	bool* flag= new bool[n];  // whether to choose it as a center
+-    for(int i = 0; i < n; i++)
+-		flag[i] = false;
+-
+-    double rand_;
+-	for(int i = 0; i < L; i++){  //generate L intial centers randomly
+-		 rand_ = double(i) / L;
+-		 index = int( (n-1) * rand_);
+-		if(index < 0 || index >= n){
+-			printf("random_generator error\n");
+-			exit(0);
+-		}
+-				
+-		if(flag[index] == false){
+-			for(int j = 0; j < d; j++)
+-			    result[i][j] = train[index][j];
+-			flag[index] = true;
+-		}
+-		else{
+-            i--;           //re-generate center
+-	    }	
+-	}
+-    float temp_sum;
+-	
+-	for(int l = 0; l < round; l++){
+-	    temp_sum = 0;
+-		for(int i = 0; i < L; i++)
+-			for(int j = 0; j < d; j++)
+-		        temp_quan[i][j] = 0;
+-			
+-		for(int i = 0; i < L; i++)
+-            tol_quan[i] = 0;			
+-		
+-		for(int i = 0; i < n; i++){
+-			for(int ii = 0; ii < L; ii++){
+-			    dist = 0;
+-			    for(int j =0; j < d; j++)
+-				    dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
+-				
+-				if(ii == 0){
+-				    min_dist = dist;
+-				    min_id = 0;
+-                    continue;					
+-				}
+-				
+-			    if (dist < min_dist){
+-				    min_dist = dist;
+-				    min_id = ii;
+-			    }
+-		    }
+-			for(int j = 0; j < d; j++){
+-			    temp_quan[min_id][j] += train[i][j];
+-			}
+-			temp_sum += min_dist;
+-			tol_quan[min_id]++;
+-		}
+-
+-		for(int i = 0; i < L; i++){
+-			if(tol_quan[i] == 0) continue;
+-			else{
+-				for(int j = 0; j < d; j++)
+-					result[i][j] = temp_quan[i][j] / tol_quan[i];
+-			}
+-		}
+-		
+-	}
+-
++// The demo retains its original pointer interface; training is shared with the
++// in-memory library and owns its temporary matrices through OpenCV.
++static cv::Mat1f copy_rows(float** rows, int count, int dim) {
++    cv::Mat1f result(count, dim);
++    for (int row = 0; row < count; ++row)
++        std::copy_n(rows[row], dim, result[row]);
++    return result;
+ }
+ 
+-void kmeans0_(
+-    float** train,
+-    float** result,
+-    int n,
+-    int d,
+-	int cen1
+-){
+-        unsigned seed;
+-	float dist, min_dist;
+-	int min_id;
+-	int index;
+-	int round= 5;  //10
+-	float** temp_quan = new float*[cen1];  //temp array for 
+-	int* tol_quan = new int[cen1];  //the number of objects on each center 
+-	for(int i = 0; i < cen1; i++)
+-		temp_quan[i] = new float[d];
+-	
+-	bool* flag= new bool[n];  // whether to choose it as a center
+-    for(int i = 0; i < n; i++)
+-		flag[i] = false;
+-
+-    double rand_;
+-	for(int i = 0; i < cen1; i++){  //generate L intial centers randomly
+-		 rand_ = double(i) / cen1;
+-		 index = int( (n-1) * rand_);
+-		if(index < 0 || index >= n){
+-			printf("random_generator error\n");
+-			exit(0);
+-		}
+-				
+-		if(flag[index] == false){
+-			for(int j = 0; j < d; j++)
+-			    result[i][j] = train[index][j];
+-			flag[index] = true;
+-		}
+-		else{
+-            i--;           //re-generate center
+-	    }	
+-	}
+-    float temp_sum;
+-
+-	for(int l = 0; l < round; l++){
+-	    temp_sum = 0;
+-		for(int i = 0; i < cen1; i++)
+-			for(int j = 0; j < d; j++)
+-		        temp_quan[i][j] = 0;
+-			
+-		for(int i = 0; i < cen1; i++)
+-            tol_quan[i] = 0;			
+-		
+-		for(int i = 0; i < n; i++){
+-			for(int ii = 0; ii < cen1; ii++){
+-			    dist = 0;
+-			    for(int j =0; j < d; j++)
+-				    dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
+-				
+-				if(ii == 0){
+-				    min_dist = dist;
+-				    min_id = 0;
+-                    continue;					
+-				}
+-				
+-			    if (dist < min_dist){
+-				    min_dist = dist;
+-				    min_id = ii;
+-			    }
+-		    }
+-			for(int j = 0; j < d; j++){
+-			    temp_quan[min_id][j] += train[i][j];
+-			}
+-			temp_sum += min_dist;
+-			tol_quan[min_id]++;
+-		}
+-		for(int i = 0; i < cen1; i++){
+-			if(tol_quan[i] == 0) continue;
+-			else{
+-				for(int j = 0; j < d; j++)
+-					result[i][j] = temp_quan[i][j] / tol_quan[i];
+-			}
+-		}
+-		
+-	}
++static void copy_centers(const cv::Mat1f& centers, float** output) {
++    for (int row = 0; row < centers.rows; ++row)
++        std::copy_n(centers[row], centers.cols, output[row]);
+ }
+ 
+-int compare_int(const void * a, const void * b)
+-{
+-  return ( *(int*)a - *(int*)b );
+-}	
+-
+-int compfloats(						// compare two real values
+-	float v1,							// 1st value (type float)
+-	float v2)							// 2nd value (type float)
+-{
+-	const float FLOATZERO = 1e-6F;
+-	if (v1 - v2 < -FLOATZERO) return -1;   //?floatzero位置
+-	else if (v1 - v2 > FLOATZERO) return 1;
+-	else return 0;
++void kmeans_(float** train, float** result, int count, int dim) {
++    cv::Mat1f centers;
++    hvs::detail::kmeans(copy_rows(train, count, dim), centers);
++    copy_centers(centers, result);
+ }
+ 
++void kmeans0_(float** train, float** result, int count, int dim, int centroids) {
++    cv::Mat1f centers;
++    hvs::detail::kmeans(copy_rows(train, count, dim), centers, centroids);
++    copy_centers(centers, result);
++}
+ 
+-void sub_kmeans_(
+-    float** train, //L * L * d
+-    float** result,  //L * d
+-    unsigned char* merge,   //length 2L
+-    int d,
+-	float** train1,
+-	float** train2,
+-	float** train0) //size_n * d
+-{
+-
+-    unsigned seed;
+-    int n = L*L;
+-    int index;
+-	int round= 5;
+-	int first_num = 5;  //10
+-	double rand_;
+-	
+-	int* weight = new int[L*L];
+-
+-	for(int i = 0; i < L*L; i++){
+-        weight[i] = 0;
+-	}
+-	
+-	int min_id1 = 0;
+-	int min_id2 = 0;
+-	float min_sum1, min_sum2;	
+-	float sum1 = 0;
+-	float sum2 = 0;	
+-	int half_d = d / 2;
+-	float** array1 = new float* [L];
+-	float** array2 = new float* [L];
+-	for(int i = 0; i < L; i++){
+-		array1[i] = new float[half_d];
+-		array2[i] = new float[half_d];
+-	}	
+-	for(int i = 0; i < L; i++){
+-		for(int j = 0; j < half_d; j++){
+-		    array1[i][j] = train[i*L+i][j];
+-		    array2[i][j] = train[i*L+i][half_d + j];
+-		}
+-	}	
+-	for(int i = 0; i < size_n; i++){
+-	    for(int j = 0; j < L; j++){
+-	          sum1 = 0;
+-	              sum2 = 0;
+-			for(int s = 0; s < half_d; s++){
+-			    sum1 += (train1[i][s] - array1[j][s]) * (train1[i][s] - array1[j][s]);
+-			    sum2 += (train2[i][s] - array2[j][s]) * (train2[i][s] - array2[j][s]);
+-			}
+-			if(j == 0) {min_id1 = 0; min_sum1 = sum1; min_id2 = 0; min_sum2 = sum2;}
+-			else{
+-				if(sum1 < min_sum1) {min_id1 = j; min_sum1 = sum1;}
+-                if(sum2 < min_sum2) {min_id2 = j; min_sum2 = sum2;}
+-			}
+-		}
+-		weight[min_id1 * L + min_id2]++;
+-	}
+-	
+-	float** temp_quan = new float*[L];
+-	int** count = new int*[L];
+-	int* tol_quan = new int[L];
+-	int* w_quan = new int[L];
+-	
+-	for(int i = 0; i < L; i++){
+-		temp_quan[i] = new float[d];
+-	    count[i] = new int[L*L];
+-	}
+-	
+-	bool * flag= new bool[n];
+-    for(int i = 0; i < n; i++)
+-		flag[i] = false;
+-	
+-	k_elem sort_array_[L*L];
+-	int min_id, id1, id2; float min_dist, dist;
+-	int pointer[L];
+-
+-	float tmp_dist;
+-	
+-	int* ord= new int[size_n];
+-	
+-	kmeans0_(train0, result, size_n, d, L);
+-	
+-	for(int i = 0; i < size_n; i++){
+-		for(int j = 0; j < L; j++){
+-			dist = 0;
+-			for(int ii = 0; ii < d; ii++)
+-				dist += (train0[i][ii] - result[j][ii]) * (train0[i][ii] - result[j][ii]);
++void sub_kmeans_(float** candidates, float** result, unsigned char* merge, int dim,
++                 float**, float**, float** train) {
++    cv::Mat1f centers;
++    hvs::detail::merge_quantizers(copy_rows(candidates, L * L, dim), centers, merge,
++                                  copy_rows(train, size_n, dim));
++    copy_centers(centers, result);
++}
+ 
+-            if(j == 0){
+-				min_id = 0;
+-				min_dist = dist;
+-			}
+-            else{
+-				if(dist < min_dist){
+-					min_id = j;
+-					min_dist = dist;
+-				}		
+-			}			
+-		}
+-		ord[i] = min_id;
+-	}
+-	//-------------------moving points------------------------
+-    for(int ii = 0; ii < L; ii++){
+-		for(int i = 0; i < n; i++){
+-			dist = 0;
+-			for(int j = 0; j < d; j++){
+-				dist += (train[i][j] - result[ii][j]) * (train[i][j] - result[ii][j]);
+-			}
+-			sort_array_[i].id = i;
+-		    sort_array_[i].dist = dist;
+-		}
+-	    qsort(sort_array_, n, sizeof(k_elem), QsortComp);
+-			
+-		for(int i = 0; i < first_num; i++){
+-		    id1 = sort_array_[i].id;
+-			dist = 0;
+-			for(int j = 0; j < size_n; j++){
+-					
+-			    if(ord[j] != ii) continue;
+-						
+-				for(int s = 0; s < d; s++)
+-					dist += (train[id1][s] - train0[j][s]) * (train[id1][s] - train0[j][s]);
+-			}
+-			if(i == 0){
+-				min_id = id1;
+-				min_dist = dist;
+-				continue;
+-			}
+-			else{
+-				if(dist < min_dist){
+-					min_id = id1;
+-					min_dist = dist;
+-				}
+-			}
+-				
+-		}
+-		tmp_dist += min_dist;
+-		pointer[ii] = min_id;
+-		for(int i = 0; i < d; i++)
+-			result[ii][i] = train[min_id][i];		
+-	}	
++void sub_kmeans0_(int block, float*** quantizer, unsigned char* merge, float** train,
++                  int subdim, int dim, float** quantizer0) {
++    std::vector<cv::Mat1f> books(min_book * nnum);
++    for (int part = 0; part < nnum; ++part)
++        books[block * nnum + part] = copy_rows(quantizer[block * nnum + part], L, subdim);
++    hvs::detail::build_start_merges(books, block, merge, copy_rows(train, size_n, dim));
++    for (int center = 0; center < cen; ++center)
++        for (int part = 0; part < nnum; ++part)
++            std::copy_n(quantizer[block * nnum + part][merge[center * nnum + part]], subdim,
++                        quantizer0[center] + part * subdim);
++}
+ 
+-	//---------------------------------------------------------	
+-	qsort(pointer, L, sizeof(int), compare_int);
+-	//----------------important sampling-------
+-	
+-	float* mean_ = new float[d];
+-	float* prob = new float[n];
+-    float* prob2 = new float[n];	
+-	
+-	for(int i = 0; i < d; i++) 
+-		mean_[i] = 0;
+-	
+-	for(int i = 0; i < n; i++)
+-		prob[i] = 0;
+-	
+-	int a =0;
+-	for(int i = 0; i < n; i++){
+-		if(weight[i] == 0) continue;
+-		for(int j = 0; j < d; j++){
+-			mean_[j] +=  train[i][j];
+-		}
+-		a++;
+-	}
+-	for(int i = 0; i < d; i++)
+-		mean_[i] = mean_[i] / a;
+-	
+-	for(int i = 0; i < n; i++){
+-		for(int j = 0; j < d; j++){
+-		    prob[i] += weight[i] * ( mean_[j] - train[i][j]) * (mean_[j] - train[i][j]);
+-        }		
+-	}	
+-	float sum_prob = 0;
+-	
+-	for(int i = 0; i < n; i++)
+-	    sum_prob += prob[i];
+-	
+-	for(int i = 0; i < n; i++)
+-		prob[i] = 1 / n / 2.0f +  prob[i] / sum_prob / 2.0f;
+-	
+-	prob2[0] = prob[0];
+-	for(int i = 1; i < n; i++){
+-		prob2[i] = prob2[i-1] + prob[i];
+-	}
+-	
+-	for(int i = 1; i < L; i++){
+-		for(int j = 0; j <= i-1; j++){
+-			if(pointer[i] == pointer[j]){
+-	            rand_ = rand() / double(RAND_MAX);
+-			    for(int l = 0; l < n; l++){
+-				    if(rand_ <= prob2[l]){
+-					    pointer[i] = l;
+-			            i--;
+-						break;
+-					}
+-				}
+-                break;				
+-			}	
+-	    }
+-	}
+-	qsort(pointer, L, sizeof(int), compare_int);
+-	//------------------------------------------	
+-	for(int i = 0; i < L; i++){
+-		merge[2*i] = pointer[i] / L;
+-		merge[2*i+1] = pointer[i] % L;
+-	}
+-}	
+-	
+-void sub_kmeans0_(
+-    int ii, 
+-    float*** quantizer,   
+-    unsigned char* merge,
+-	float** train0,
+-	int min_dim,
+-	int max_dim,
+-	float** quantizer0)
+-{
+-    int index;
+-	float sum = 0;
+-	float min_sum;
+-    int min_id;	
+-	bool flag;
+-	
+-	float** result = new float* [cen];
+-	for(int i = 0; i < cen; i++)
+-		result[i] = new float[max_dim];
+-	
+-	float* result0 = new float[min_dim];
+-	
+-	unsigned char** obj = new unsigned char* [cen];
+-	for(int i = 0; i < cen; i++)
+-		obj[i] = new unsigned char[nnum];
+-	
+-	kmeans0_(train0, result, size_n, max_dim, cen);
+-		
+-    for(int i = 0; i < cen; i++){
+-		for(int j = 0; j < nnum; j++){			
+-			for(int l = 0; l < min_dim; l++){
+-			    result0[l] = result[i][j* min_dim +l];	
+-			}
+-            index = ii * nnum + j;
+-            for(int l = 0; l < L; l++){
+-				sum = 0;
+-				for(int jj = 0; jj < min_dim; jj++){
+-					sum += (quantizer[index][l][jj] - result0[jj]) * (quantizer[index][l][jj] - result0[jj]);
+-				}
+-				if(l == 0) {min_id = 0; min_sum = sum;}
+-				else{
+-					if(sum < min_sum){
+-						min_id = l;
+-						min_sum = sum;
+-					}
+-				}
+-			}
+-		    obj[i][j] = min_id;
+-						
+-			for(int l = 0; l < min_dim; l++)
+-                quantizer0[i][ j * min_dim + l]	= quantizer[index][min_id][l];		
+-		}
+-	}
+-	
+-	for(int i = 0; i < cen; i++){
+-		for(int j = i+1; j < cen; j++ ){
+-			flag = true;
+-			for(int l = 0; l < nnum; l++){
+-				if(obj[i][l] != obj[j][l]){
+-					flag = false;
+-					break;
+-				}
+-			}
+-			if(flag == true){
+-			//	printf("same obj\n");
+-			}
+-		}
+-	}
+-	
+-	for(int i = 0; i < cen; i++){
+-		for(int j = 0; j < nnum; j++){
+-			merge[i * nnum + j] = obj[i][j];
+-		}
+-	}
+-		
+-}		
+-	
+ void sift_test1B(
+     char* path_data,
+ 	char* path_q,

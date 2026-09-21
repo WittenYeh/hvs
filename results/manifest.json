@@ -1,0 +1,55 @@
+{
+  "dataset": "SIFT1M",
+  "n": 1000000,
+  "dimension": 128,
+  "nq": 10000,
+  "ground_truth": "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_groundtruth.ivecs",
+  "current_commit": "33de94f523fa46fc8703411148b50fc89ada3f8c",
+  "upstream_commit": "f554268f8c6abcbc23ab35c3562703d7df8ae7b5",
+  "parameters": {
+    "T": 1,
+    "M": 16,
+    "efConstruction": 500,
+    "delta": 0.5,
+    "training_samples": 10000,
+    "seed": 100
+  },
+  "build_threads": 16,
+  "query_threads": [
+    1,
+    16
+  ],
+  "opencv_threads": 1,
+  "cpus": "0-15",
+  "physical_cores": 16,
+  "independent_builds_per_variant": 1,
+  "warmup_queries_per_query_configuration": 1000,
+  "timing_samples_per_build": 1,
+  "minimum_seconds_per_timing_sample": 0.12,
+  "recall_definition": "ID intersection with full SIFT ground truth, divided by nq*k",
+  "query_timing": "query copy/padding + rotation + distance tables + routing + all graph traversal; excludes setup, index loading, GT evaluation and result serialization",
+  "build_timing": "warm file cache to query-ready index: current data load + constructor; upstream native build API including its I/O + index/metadata reload in a fresh process",
+  "cpu": "Architecture:                         x86_64\nCPU op-mode(s):                       32-bit, 64-bit\nAddress sizes:                        46 bits physical, 57 bits virtual\nByte Order:                           Little Endian\nCPU(s):                               64\nOn-line CPU(s) list:                  0-63\nVendor ID:                            GenuineIntel\nModel name:                           Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz\nCPU family:                           6\nModel:                                106\nThread(s) per core:                   2\nCore(s) per socket:                   16\nSocket(s):                            2\nStepping:                             6\nCPU max MHz:                          3500.0000\nCPU min MHz:                          800.0000\nBogoMIPS:                             5800.00\nFlags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 intel_ppin ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb intel_pt avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local split_lock_detect wbnoinvd dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq la57 rdpid fsrm md_clear pconfig flush_l1d arch_capabilities\nVirtualization:                       VT-x\nL1d cache:                            1.5 MiB (32 instances)\nL1i cache:                            1 MiB (32 instances)\nL2 cache:                             40 MiB (32 instances)\nL3 cache:                             48 MiB (2 instances)\nNUMA node(s):                         2\nNUMA node0 CPU(s):                    0-15,32-47\nNUMA node1 CPU(s):                    16-31,48-63\nVulnerability Gather data sampling:   Mitigation; Microcode\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Mitigation; Clear CPU buffers; SMT vulnerable\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Not affected\nVulnerability Spec rstack overflow:   Not affected\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:             Mitigation; Enhanced / Automatic IBRS; IBPB conditional; RSB filling; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected\n",
+  "compiler": "g++ (GCC) 14.3.0",
+  "library_sha256": {
+    "/home/weitang/artea-benchmark/bench-hvs/build/hvs/libhvs.a": "273c7ca706db76fa5e691314ed12e5d0c1f647dfc5f1379b3e62b4acd2d2d1b3",
+    "/home/weitang/artea-benchmark/bench-hvs/build/hvs/third-party/opencv/lib/libopencv_core.a": "022d0ffbefce5149972e45c52599c375853b644c447bdbb45134c564828f2cf0",
+    "/home/weitang/artea-benchmark/bench-hvs/build/hvs/third-party/zlib/libz.a": "d1b152315aa7dd2bd3573700c0e5081cee9770216757894fc5f15a510270eee4"
+  },
+  "data_sha256": {
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_base.fvecs": "21f66e2975057b5728ba56de1c825bac4f4d89d596609ae985741c6242631816",
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_query.fvecs": "f7fc9be140accdfd64116c2fa2365ecdb69b8f084970c6b0532db5ff79ac8fdc",
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_groundtruth.ivecs": "2b71de0a8d5a83e6a84eec3e23fb8b611d8801dd9b3a6cd62f070ab65ea65f4f"
+  },
+  "runner_source_sha256": {
+    "benchmark.cpp": "6593c43f5da3556a76973c956f062c009b06a7b6068508454062524d96e91cf7",
+    "original_adapter.hpp": "79f64cc034d7799825536406c3c7375bf326e728921fa33849de32b17660a67e"
+  },
+  "upstream_source_patch_sha256": "7b18ca0dc9fd4fcaa62703ce04dd8aa63e878b5b09855db18a409927c308905f",
+  "submodules": {
+    "opencv": "4223495e6cd67011f86b8ecd9be1fa105018f3b1",
+    "eigen": "3147391d946bb4b6c68edd901f2add6ac1f31f8c",
+    "zlib": "da607da739fa6047df13e66a2af6b8bec7c2a498"
+  },
+  "first_repeat": 1
+}

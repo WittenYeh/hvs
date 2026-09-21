@@ -1,0 +1,118 @@
+{
+  "unchanged_graph_function_bodies": {
+    "getRandomLevel": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "InsertIntoPool": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "searchBaseLayer": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "getNeighborsByHeuristic2": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "mutuallyConnectNewElement": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "connect": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "searchQuanST": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "est_density": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "permutation": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "quandistfunc_": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "querydistfunc_": {
+      "upstream_definitions": 2,
+      "current_definitions": 2,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "addPoint": {
+      "upstream_definitions": 2,
+      "current_definitions": 2,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "getDataByInternalId": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    },
+    "getExternalLabel": {
+      "upstream_definitions": 1,
+      "current_definitions": 1,
+      "equal_ignoring_comments_whitespace": true
+    }
+  },
+  "query_function_bodies": {
+    "SearchWithsingleGraph": {
+      "equal_after_candidate_storage_normalization": true,
+      "normalization": "Replace reusable workspace selection/reset with original local candidate allocation; remove original unused init_ids vector. No arithmetic, comparisons, graph traversal or result mapping normalized."
+    },
+    "SearchWithquanGraph": {
+      "equal_after_candidate_storage_normalization": true,
+      "normalization": "Replace reusable workspace selection/reset with original local candidate allocation; remove original unused init_ids vector. No arithmetic, comparisons, graph traversal or result mapping normalized."
+    },
+    "SearchWithquanGraph2": {
+      "equal_after_candidate_storage_normalization": true,
+      "normalization": "Replace reusable workspace selection/reset with original local candidate allocation; remove original unused init_ids vector. No arithmetic, comparisons, graph traversal or result mapping normalized."
+    },
+    "SearchWithquanGraph3": {
+      "equal_after_candidate_storage_normalization": true,
+      "normalization": "Replace reusable workspace selection/reset with original local candidate allocation; remove original unused init_ids vector. No arithmetic, comparisons, graph traversal or result mapping normalized."
+    },
+    "SearchWithOptGraph": {
+      "equal_after_candidate_storage_normalization": true,
+      "normalization": "Replace reusable workspace selection/reset with original local candidate allocation; remove original unused init_ids vector. No arithmetic, comparisons, graph traversal or result mapping normalized."
+    }
+  },
+  "unchanged_files": {
+    "hnsw/hnswlib/space_ip.h": true,
+    "hnsw/hnswlib/hnswlib.h": true,
+    "hnsw/hnswlib/space_l2.h": true,
+    "hnsw/hnswlib/bruteforce.h": true,
+    "hnsw/hnswlib/visited_list_pool.h": true
+  },
+  "previously_validated_sources": {
+    "hnsw/hvs.cpp": true,
+    "hnsw/hvs.hpp": true,
+    "hnsw/quantizer.cpp": true,
+    "hnsw/quantizer.hpp": true,
+    "hnsw/hnswlib/bruteforce.h": true,
+    "hnsw/hnswlib/hnswalg.h": true,
+    "hnsw/hnswlib/hnswlib.h": true,
+    "hnsw/hnswlib/space_ip.h": true,
+    "hnsw/hnswlib/space_l2.h": true,
+    "hnsw/hnswlib/visited_list_pool.h": true,
+    "hnsw/main.cpp": true,
+    "hnsw/sift_1b.cpp": true,
+    "hnsw/sift_test.cpp": true
+  }
+}

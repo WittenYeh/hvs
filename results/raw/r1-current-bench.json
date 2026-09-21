@@ -1,0 +1,26 @@
+{
+  "repeat": 1,
+  "variant": "current",
+  "mode": "bench",
+  "command": [
+    "taskset",
+    "-c",
+    "0-15",
+    "/home/weitang/hvs-performance-20260921/current-benchmark",
+    "bench",
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_base.fvecs",
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_query.fvecs",
+    "/home/weitang/artea-benchmark/third-party/ann-datasets/sift-1m/sift_groundtruth.ivecs",
+    "1000000",
+    "128",
+    "1",
+    "16"
+  ],
+  "returncode": 0,
+  "wall_seconds": 517.0585923157632,
+  "load_average": [
+    6.58544921875,
+    5.669921875,
+    5.36865234375
+  ]
+}

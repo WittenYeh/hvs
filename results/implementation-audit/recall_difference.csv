@@ -1,0 +1,9 @@
+case,independent_build_max_abs_recall_delta_pp,same_index_max_abs_recall_delta_pp,same_index_compared_ids,same_index_different_ids
+gaussian32-T1,0.78125,0.0,65792,0
+gaussian32-T2,3.515625,0.0,65792,0
+gaussian32-T3,2.734375,0.0,65792,0
+gaussian32-T4,2.734375,0.0,65792,0
+gaussian17-T2,4.6875,0.0,65792,0
+sift128-T1,0.5000000000000004,0.0,257000,0
+sift128-T2,1.0000000000000009,0.0,257000,0
+glove100-T1,1.3671875,0.0,131584,0

@@ -1,0 +1,14 @@
+[
+  {
+    "variant": "upstream",
+    "query_configurations": 14,
+    "compared_ids": 257000,
+    "different_ids": 0
+  },
+  {
+    "variant": "current",
+    "query_configurations": 14,
+    "compared_ids": 257000,
+    "different_ids": 0
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "upstream_revision": "f554268f8c6abcbc23ab35c3562703d7df8ae7b5",
+  "current_revision": "33de94f523fa46fc8703411148b50fc89ada3f8c",
+  "threads": 64,
+  "numa": "policy: interleave\npreferred node: 1 (interleave next)\ninterleavemask: 0 1 \ninterleavenode: 1\nphyscpubind: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 \ncpubind: 0 1 \nnodebind: 0 1 \nmembind: 0 1 \n",
+  "opencv_threads": 1,
+  "seed": 100,
+  "query_scheduling": "dynamic,1",
+  "data": {
+    "gaussian32": {
+      "name": "gaussian32",
+      "n": 10000,
+      "dim": 32,
+      "nq": 256,
+      "truth": "exact squared L2 in float64, stable ID ties",
+      "sha256": {
+        "base.fvecs": "b01518c049ac1e9de6bbab7fe0bf90e4faee623ef7032efce6ec27f07f96ec36",
+        "query.fvecs": "3707a85d1896af11257ed98acfc56a72992e6f27aaf45716dc73a5d628485714",
+        "truth.gt": "32d78f4542af176f0ab78b401cf74779415334eae3808bdb83602762ea632fe2"
+      }
+    },
+    "gaussian17": {
+      "name": "gaussian17",
+      "n": 10000,
+      "dim": 17,
+      "nq": 256,
+      "truth": "exact squared L2 in float64, stable ID ties",
+      "sha256": {
+        "base.fvecs": "524223d39ba306a106dc3d697341c5185ef42ca015fac42ca88a5a3349dba18c",
+        "query.fvecs": "2b0a17850825626995bb64b8fb0693247f68feb96da10b31e624b9e661cef0e8",
+        "truth.gt": "66c02a2989aae3f9aa0fa773c426c03725e03230bc3d8c25a2b8bd2cf6355d34"
+      }
+    },
+    "sift128": {
+      "name": "sift128",
+      "n": 10000,
+      "dim": 128,
+      "nq": 1000,
+      "truth": "exact squared L2 in float64, stable ID ties",
+      "sha256": {
+        "base.fvecs": "1e90414a3254361aba48a0d58e461f7661fb135dabb3da985290e94de8f60fe0",
+        "query.fvecs": "8667c6608803790773cbb056c036811b7d57d134238fd95ea3721965737ad54f",
+        "truth.gt": "6b2ea7a94eaa9d79cdb7c35a7cf0b518d9b4260e38a331a9492bf756f2b0089d"
+      }
+    },
+    "glove100": {
+      "name": "glove100",
+      "n": 10000,
+      "dim": 100,
+      "nq": 512,
+      "truth": "exact squared L2 in float64, stable ID ties",
+      "sha256": {
+        "base.fvecs": "8c29fcfaf6941733501568bb26ed0a7f6ca8008dc4dd4a5fccfa553a0053a3cf",
+        "query.fvecs": "f7f045ae0e41a46ad283f3bff18ea9913e9351ea0edc664807f5b5d1a24cac20",
+        "truth.gt": "4635f516e698854408f75d58469bf8e51709a3f2da24304335db064b91b0ada6"
+      }
+    }
+  },
+  "source_sha256": {
+    "hnsw/hvs.cpp": "893663c58277529fa8e4d3a6c12c7323d3e8dd9f0d607afd2138768e8d9a4d16",
+    "hnsw/sift_test.cpp": "dcef855f5fc2818c4e304e8e3c189ec82eb1bdf7020e292a0296f047fd7b43f9",
+    "hnsw/hvs.hpp": "e7d45d333899812e5e231fd3d7c19d2826c9fcc10f9494cb4b26062ec1469379",
+    "hnsw/sift_1b.cpp": "52400c418be436054b91ae9849571b4cfb3e9c0e9e6b194344191d4c43197af8",
+    "hnsw/main.cpp": "a8751a6de1692ca2b0b49f5cff74000a9e03da4646fda6a69d71e110f5f1abf4",
+    "hnsw/quantizer.hpp": "d8ec771a2300b21627ddc9bafc76fe72dc9f7af68bcc9fdd539e3edcdb326668",
+    "hnsw/quantizer.cpp": "7d39b09b62e8c35238b9c616eb41416096124ad61e85dd15ae2a2b0745d1a21b",
+    "hnsw/hnswlib/space_ip.h": "bbfd0d6851c797a6464585438990ec64731d1d892761eefb9a21e89d86530c80",
+    "hnsw/hnswlib/hnswlib.h": "bcaf61a58a3e3f7ed7883c91bef4ca2c407f80b669fef0602d939fc635080aa8",
+    "hnsw/hnswlib/space_l2.h": "927a78b03782f67b0ee92dadd50eb497d3255ef7725f4fc33d41cb8c8acf1139",
+    "hnsw/hnswlib/bruteforce.h": "f0fa7979cb83898112cb67053c4c184ef747ea73119e6866a527cde35aa3b10c",
+    "hnsw/hnswlib/hnswalg.h": "1eff0a916321eb06b0e4f9c1635a29c6d5ed9c8d095bf1d9fe128ed6277bc1df",
+    "hnsw/hnswlib/visited_list_pool.h": "cc55c52c32b461ac72cbc57f9d3c07a0de4678b4b77866f3c319d201f04a9636"
+  },
+  "upstream_remote_head": "f554268f8c6abcbc23ab35c3562703d7df8ae7b5",
+  "harness_sha256": {
+    "query_audit.cpp": "f018b912fe6d8d796a9d872154e1c0b08a3a8adf26bc6ee62904aed26dff0087",
+    "original_adapter.hpp": "79f64cc034d7799825536406c3c7375bf326e728921fa33849de32b17660a67e"
+  },
+  "observability_change": "Current snapshot only: expose Index::impl_ for post-build serialization; production sources unchanged.",
+  "seed_control": "Link original harness with --wrap=time returning 100; current BuildConfig seed=100.",
+  "algorithm_patch_sha256": "1223017a7091f2e97d3acc594e8db97f26d7b31f7b9ed005b3cfddf746985609"
+}

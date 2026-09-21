@@ -1,0 +1,17 @@
+{
+  "command": [
+    "numactl",
+    "--interleave=all",
+    "/home/weitang/hvs-audit-20260921/upstream-audit",
+    "build",
+    "/home/weitang/hvs-equivalence-20260921/data/gaussian32/base.fvecs",
+    "/home/weitang/hvs-equivalence-20260921/data/gaussian32/query.fvecs",
+    "10000",
+    "32",
+    "4",
+    "256"
+  ],
+  "returncode": 0,
+  "threads": 64,
+  "wall_seconds": 259.38178637996316
+}

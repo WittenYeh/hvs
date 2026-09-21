@@ -1,0 +1,10 @@
+--- a/hnsw/sift_1b.cpp
++++ b/hnsw/sift_1b.cpp
+@@ -2162,6 +2162,7 @@
+     appr_alg-> deleteLinklist(max_level_-1, path_index2);
+ 	
+     input.close();
++    perf_native_build_seconds = 1e-6 * stopw_full.getElapsedTimeMicro();
+     cout << "Build time:" << 1e-6 * stopw_full.getElapsedTimeMicro() << "  seconds\n";
+ 
+ 	appr_alg->saveIndex(path_index, data_test);

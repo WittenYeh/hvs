@@ -1,0 +1,2 @@
+AUDIT_THREADS 64
+AUDIT_OK configurations=17 ids=368000 threads=64
