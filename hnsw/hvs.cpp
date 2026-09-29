@@ -454,11 +454,14 @@ struct Index::QueryScratch::Impl {
 
 Index::Index(const float *base, size_t size, size_t dim, const BuildConfig &config)
     : n(size), dimension(dim) {
-    if (!base || size < 257 || size > INT_MAX || dim == 0 || dim > INT_MAX - 128 || config.T < 1 ||
-        config.T > 4 || !(config.delta > 0 && config.delta <= 1) || config.M < 2 || config.M >= int(size) ||
+    if (config.T < 4 || config.T > 7)
+        throw std::invalid_argument("HVS T uses the paper's finest quantization level; require T in [4,7]");
+    if (!base || size < 257 || size > INT_MAX || dim == 0 || dim > INT_MAX - 128 ||
+        !(config.delta > 0 && config.delta <= 1) || config.M < 2 || config.M >= int(size) ||
         config.ef_construction < config.M || config.training_samples < 257)
         throw std::invalid_argument("Invalid HVS dimensions/count or build parameters");
-    impl_ = std::make_unique<Impl>(int(size), int(dim), config.T);
+    const int quantized_layers = config.T - offset;
+    impl_ = std::make_unique<Impl>(int(size), int(dim), quantized_layers);
     impl_->build(base, config);
 }
 Index::~Index() = default;

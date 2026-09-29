@@ -5,7 +5,9 @@
 namespace hvs {
 
 struct BuildConfig {
-    int T = 1;
+    // Paper's finest quantization level, in [4, 7]. There are T - 3
+    // quantized graph layers, with 2^T sub-codebooks at the finest level.
+    int T = 4;
     float delta = 0.5f;
     int M = 16;
     int ef_construction = 500;

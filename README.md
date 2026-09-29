@@ -16,6 +16,11 @@ on 2026-09-21. Later documentation and result-publication commits do not change
 the measured algorithm sources. Reports, plotting scripts, measurements and
 raw logs are checked into [results/](results/).
 
+The historical measurements and audit below use the former `T` convention:
+`T` counted quantized graph layers. The current API and demo use the paper's
+finest quantization level, so add 3 to a historical `T` to reproduce its
+structure. Archived result files retain their original parameter values.
+
 ### Full SIFT1M performance
 
 This comparison uses all **1,000,000 base vectors and 10,000 queries**, 128
@@ -146,11 +151,19 @@ index files:
 
 ```cpp
 hvs::BuildConfig config;
+config.T = 4; // Paper level 4: one quantized graph layer, 16 sub-codebooks.
 hvs::Index index(base, num_vectors, dim, config);
 const auto queue = std::min(std::size_t(100), index.max_search_queue());
 hvs::Index::QueryScratch scratch(index, queue);
 index.search(query, topk, queue, ids, scratch);
 ```
+
+`BuildConfig::T` uses the paper's finest quantization level, supported in
+`[4,7]` and defaulting to `4`. The library builds `T-3` quantized graph layers
+and uses `2^T` sub-codebooks at the finest level. For example, `T=7` means
+four quantized graph layers. The entry routing structure and original-vector
+base graph are separate. To migrate older configs, add 3 to the former
+layer-count `T`; the internal graph structure and search algorithm are unchanged.
 
 Use one scratch object per query worker, with `0 < topk <= queue`. The library
 copies input vectors during construction. `quantizer.cpp` contains the training
@@ -165,7 +178,8 @@ The original file-based demo below is built when `HVS_BUILD_DEMO=ON` (the defaul
 for a standalone build). It is disabled by default when included as a subdirectory.
 
 * `K` is the value of top-K, `L` is the value of efsearch and `qn` is the size of query set
-* `T` and `delta` are user-specified parameters of HVS
+* `T` is the paper's finest quantization level in `[4,7]`; `delta` controls density thinning.
+  The demo converts `T` to `T-3` quantized graph layers internally, for both index building and loading.
 * The data set, query set and the ground_truth set are stored in dPath.ds, qPath.q and truth.gt
 
 Build HVS index
